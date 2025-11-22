@@ -70,37 +70,53 @@ This document tracks the stepwise upgrade of FreeScout from Laravel 5.5 to Larav
 
 ### Phase 1: Laravel 5.5 → 5.6
 
-**PHP Requirement:** 7.1.3+
-**Status:** Not Started
+**PHP Requirement:** 7.1.3+ (Current env: PHP 8.4.15 - compatibility limited)
+**Status:** MOSTLY COMPLETE - Core upgrade done, PHP 8.4 issues present
 
 #### Tasks
 
-- [ ] Update composer.json: `laravel/framework: ^5.6`
-- [ ] Review override files for 5.6 compatibility
-- [ ] Update deprecated methods:
-  - [ ] String validation rules (pipe-separated → array)
-  - [ ] Update `string` and `array` validation rules
-- [ ] Update dependencies:
-  - [ ] `symfony/*: ^4.0`
-  - [ ] Check all packages for 5.6 compatibility
-- [ ] Database changes:
-  - [ ] Review index lengths (MySQL)
-  - [ ] Test migrations
-- [ ] Run tests:
-  - [ ] `php artisan test`
-  - [ ] Fix any failures
-- [ ] Manual testing:
-  - [ ] Login/Authentication
-  - [ ] Create/update conversations
-  - [ ] Email fetching
-  - [ ] Module system
-  - [ ] Real-time features
-- [ ] Commit changes
+- [x] Update composer.json: `laravel/framework: 5.6.*`
+- [x] Update dependencies:
+  - [x] `symfony/*: ^4.0` (upgraded to 4.4.x)
+  - [x] `fideloper/proxy: ^4.0`
+  - [x] `laravel/tinker: ^1.0`
+- [x] Handle package issues:
+  - [x] Removed codedge/laravel-selfupdater (repository access issues)
+  - [x] Added GitHub repository override
+  - [x] Fixed rap2hpoutre/laravel-log-viewer classmap issue
+- [x] Fix model compatibility:
+  - [x] Added `getQueueableRelations()` method to Subscription model
+- [ ] ⚠️ **PHP 8.4 Compatibility Issues:**
+  - [ ] Logger.php deprecation warnings (implicit nullable parameters)
+  - [ ] Artisan commands partially working with warnings
+  - [ ] Override system conflicts with Symfony 4/PHP 8.4
+- [ ] Review override files for 5.6 compatibility (deferred)
+- [ ] Database changes (deferred - no database in environment)
+- [ ] Run tests (blocked by PHP 8.4 compatibility)
+- [ ] Manual testing (blocked by runtime environment)
+- [x] Commit changes
 
-**Breaking Changes:**
-- Validation rule changes
-- Symfony 4 updates
-- Logging configuration changes
+**Packages Updated:**
+- laravel/framework: v5.5.40 → v5.6.16 ✓
+- symfony/*: v3.4.x → v4.4.x ✓
+- swiftmailer: v6.1 → v6.3.0 ✓
+- dragonmantank/cron-expression: v2.3.1 (replaces mtdowling) ✓
+
+**Packages Removed:**
+- codedge/laravel-selfupdater
+- symfony/polyfill-php70
+
+**Breaking Changes Encountered:**
+- QueueableEntity interface requires `getQueueableRelations()` method
+- Symfony 4 updates (mostly compatible through override system)
+- PHP 8.4 deprecation warnings in Logger
+
+**Known Issues:**
+1. PHP 8.4 deprecation warnings prevent clean artisan execution
+2. Override system needs review for Symfony 4 compatibility
+3. May need to add `getQueueableRelations()` to other models
+
+**Next Steps:** Continue to Laravel 5.7 to progress toward PHP 8-compatible versions
 
 ---
 
