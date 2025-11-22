@@ -80,7 +80,6 @@
     },
     "autoload": {
         "classmap": [
-            "database/seeds",
             "database/factories",
             "overrides/natxet/cssmin/src/"
         ],

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,6 +18,9 @@ class AppServiceProvider extends ServiceProvider
         // To avoid MySQL error in packages:
         // "SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 767 bytes"
         Schema::defaultStringLength(191);
+
+        // Use Bootstrap pagination instead of Tailwind (Laravel 8 default)
+        Paginator::useBootstrap();
 
         // Models observers
         \App\Mailbox::observe(\App\Observers\MailboxObserver::class);

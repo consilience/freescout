@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Conversation;
 use Illuminate\Database\Seeder;
 
