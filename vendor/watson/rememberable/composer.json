@@ -1,0 +1,27 @@
+{
+    "name": "watson/rememberable",
+    "description": "Query caching for Laravel",
+    "keywords": [
+        "laravel",
+        "eloquent",
+        "caching",
+        "remember"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dwight Watson",
+            "email": "dwight@studiousapp.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/database": "^8.0|^9.0|^10.0|^11.0",
+        "illuminate/support": "^8.0|^9.0|^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Watson\\Rememberable\\": "src/"
+        }
+    }
+}

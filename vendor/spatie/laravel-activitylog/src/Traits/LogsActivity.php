@@ -2,13 +2,14 @@
 
 namespace Spatie\Activitylog\Traits;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\ActivityLogger;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\ActivitylogServiceProvider;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Activitylog\ActivityLogStatus;
 
 trait LogsActivity
 {
@@ -32,10 +33,16 @@ trait LogsActivity
                     return;
                 }
 
+                $attrs = $model->attributeValuesToBeLogged($eventName);
+
+                if ($model->isLogEmpty($attrs) && ! $model->shouldSubmitEmptyLogs()) {
+                    return;
+                }
+
                 $logger = app(ActivityLogger::class)
                     ->useLog($logName)
                     ->performedOn($model)
-                    ->withProperties($model->attributeValuesToBeLogged($eventName));
+                    ->withProperties($attrs);
 
                 if (method_exists($model, 'tapActivity')) {
                     $logger->tap([$model, 'tapActivity'], $eventName);
@@ -44,6 +51,16 @@ trait LogsActivity
                 $logger->log($description);
             });
         });
+    }
+
+    public function shouldSubmitEmptyLogs(): bool
+    {
+        return ! isset(static::$submitEmptyLogs) ? true : static::$submitEmptyLogs;
+    }
+
+    public function isLogEmpty($attrs): bool
+    {
+        return empty($attrs['attributes'] ?? []) && empty($attrs['old'] ?? []);
     }
 
     public function disableLogging()
@@ -112,7 +129,9 @@ trait LogsActivity
 
     protected function shouldLogEvent(string $eventName): bool
     {
-        if (! $this->enableLoggingModelsEvents) {
+        $logStatus = app(ActivityLogStatus::class);
+
+        if (! $this->enableLoggingModelsEvents || $logStatus->disabled()) {
             return false;
         }
 

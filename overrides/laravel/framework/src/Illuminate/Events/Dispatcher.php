@@ -61,7 +61,7 @@ class Dispatcher implements DispatcherContract
      * @param  mixed  $listener
      * @return void
      */
-    public function listen($events, $listener)
+    public function listen($events, $listener = null)
     {
         foreach ((array) $events as $event) {
             if (Str::contains($event, '*')) {

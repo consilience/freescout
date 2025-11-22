@@ -6,7 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'UpdateHelper\\' => array($vendorDir . '/kylekatarnls/update-helper/src'),
     'Swift_' => array($baseDir . '/overrides/swiftmailer/swiftmailer/lib/classes'),
     'Rap2hpoutre\\LaravelLogViewer\\' => array($vendorDir . '/rap2hpoutre/laravel-log-viewer/src'),
     'Parsedown' => array($vendorDir . '/erusev/parsedown'),
