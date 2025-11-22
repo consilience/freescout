@@ -15,7 +15,7 @@
         "symfony/debug": "^4.0",
         "devfactory/minify": "1.0.7",
         "fideloper/proxy": "^4.0",
-        "laravel/framework": "5.7.*",
+        "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
         "mews/purifier": "3.2.2",
         "spatie/laravel-activitylog": "^2.8|^3.0",
@@ -23,7 +23,7 @@
         "watson/rememberable": "2.0.4",
         "nwidart/laravel-modules": "2.7.0",
         "tormjens/eventy": "0.5.4",
-        "barryvdh/laravel-translation-manager": "v0.5.0",
+        "barryvdh/laravel-translation-manager": "^0.6",
         "chumper/zipper": "v1.0.2",
         "rachidlaasri/laravel-installer": "4.0.2",
         "rap2hpoutre/laravel-log-viewer": "v2.0.0",
@@ -37,14 +37,14 @@
         "enshrined/svg-sanitize": "0.15.4"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "v3.2.0",
+        "barryvdh/laravel-debugbar": "^3.2",
         "filp/whoops": "2.14.5",
         "fzaninotto/faker": "v1.9.2",
         "mockery/mockery": "1.1.0",
         "phpunit/phpunit": "9.5.28",
 
         "symfony/polyfill-ctype": "^1.10",
-        "vlucas/phpdotenv": "^2.5",
+        "vlucas/phpdotenv": "^3.3",
         "symfony/css-selector": "^4.0",
         "symfony/var-dumper": "^4.0",
         "symfony/routing": "^4.0",
@@ -496,12 +496,6 @@
             ]
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/codedge/laravel-selfupdater"
-        }
-    ],
     "scripts": {
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
