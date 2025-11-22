@@ -759,18 +759,99 @@ class Application
     }
 
     /**
-     * Renders a caught exception.
+     * Renders a caught throwable.
      */
-    public function renderException(\Exception $e, OutputInterface $output)
+    public function renderThrowable(\Throwable $e, OutputInterface $output)
     {
         $output->writeln('', OutputInterface::VERBOSITY_QUIET);
 
-        $this->doRenderException($e, $output);
+        $this->doRenderThrowable($e, $output);
 
         if (null !== $this->runningCommand) {
             $output->writeln(sprintf('<info>%s</info>', sprintf($this->runningCommand->getSynopsis(), $this->getName())), OutputInterface::VERBOSITY_QUIET);
             $output->writeln('', OutputInterface::VERBOSITY_QUIET);
         }
+    }
+
+    /**
+     * Renders a caught exception.
+     */
+    public function renderException(\Exception $e, OutputInterface $output)
+    {
+        $this->renderThrowable($e, $output);
+    }
+
+    protected function doRenderThrowable(\Throwable $e, OutputInterface $output)
+    {
+        do {
+            $message = trim($e->getMessage());
+            if ('' === $message || OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
+                $title = sprintf('  [%s%s]  ', \get_class($e), 0 !== ($code = $e->getCode()) ? ' ('.$code.')' : '');
+                $len = Helper::strlen($title);
+            } else {
+                $len = 0;
+            }
+
+            $width = $this->terminal->getWidth() ? $this->terminal->getWidth() - 1 : \PHP_INT_MAX;
+            // HHVM only accepts 32 bits integer in str_split, even when PHP_INT_MAX is a 64 bit integer: https://github.com/facebook/hhvm/issues/1327
+            if (\defined('HHVM_VERSION') && $width > 1 << 31) {
+                $width = 1 << 31;
+            }
+            $lines = [];
+
+            foreach ('' !== $message ? preg_split('/\r?\n/', $message) : [] as $line) {
+                foreach (str_split($line, $width - 4) as $chunk) {
+                    // pre-format lines to get the right string length
+                    $lineLength = Helper::strlen($chunk) + 4;
+                    $lines[] = [$chunk, $lineLength];
+
+                    $len = max($lineLength, $len);
+                }
+            }
+
+            $messages = [];
+            if (!$e instanceof \Exception && !$e instanceof \Throwable) {
+                $messages[] = '<comment>Legacy exception</comment>';
+            }
+            $messages[] = '';
+            $messages[] = $emptyLine = sprintf('<error>%s</error>', str_repeat(' ', $len));
+            if ('' === $message || OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
+                $messages[] = sprintf('<error>%s%s</error>', $title, str_repeat(' ', max(0, $len - Helper::strlen($title))));
+            }
+            foreach ($lines as $line) {
+                $messages[] = sprintf('<error>  %s  %s</error>', OutputFormatter::escape($line[0]), str_repeat(' ', $len - $line[1]));
+            }
+            $messages[] = $emptyLine;
+            $messages[] = '';
+
+            $output->writeln($messages, OutputInterface::VERBOSITY_QUIET);
+
+            if (OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
+                $output->writeln('<comment>Exception trace:</comment>', OutputInterface::VERBOSITY_QUIET);
+
+                // exception related properties
+                $trace = $e->getTrace();
+
+                array_unshift($trace, [
+                    'function' => '',
+                    'file' => $e->getFile() ?: 'n/a',
+                    'line' => $e->getLine() ?: 'n/a',
+                    'args' => [],
+                ]);
+
+                for ($i = 0, $count = \count($trace); $i < $count; ++$i) {
+                    $class = $trace[$i]['class'] ?? '';
+                    $type = $trace[$i]['type'] ?? '';
+                    $function = $trace[$i]['function'] ?? '';
+                    $file = $trace[$i]['file'] ?? 'n/a';
+                    $line = $trace[$i]['line'] ?? 'n/a';
+
+                    $output->writeln(sprintf(' %s%s%s() at <info>%s:%s</info>', $class, $type, $function, $file, $line), OutputInterface::VERBOSITY_QUIET);
+                }
+
+                $output->writeln('', OutputInterface::VERBOSITY_QUIET);
+            }
+        } while ($e = $e->getPrevious());
     }
 
     protected function doRenderException(\Exception $e, OutputInterface $output)
