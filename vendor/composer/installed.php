@@ -3,7 +3,7 @@
         'name' => 'freescout-helpdesk/freescout',
         'pretty_version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
         'version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
-        'reference' => '1225d04aa3f710f79f2b96a7eb0252c0997d36fb',
+        'reference' => '4a2184305353a2340260e52514e7e106bbfccf81',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -16,15 +16,6 @@
             'reference' => '48f97b295c82d99c1fe10d8b0684c43f051b5580',
             'type' => 'library',
             'install_path' => __DIR__ . '/../anahkiasen/underscore-php',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'axn/laravel-laroute' => array(
-            'pretty_version' => '1.3.0',
-            'version' => '1.3.0.0',
-            'reference' => '40ccb656a5ca380c4cd7de7f80667f1d6cd9aeeb',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../axn/laravel-laroute',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -232,7 +223,7 @@
         'freescout-helpdesk/freescout' => array(
             'pretty_version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
             'version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
-            'reference' => '1225d04aa3f710f79f2b96a7eb0252c0997d36fb',
+            'reference' => '4a2184305353a2340260e52514e7e106bbfccf81',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -254,7 +245,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../guzzlehttp/guzzle',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'guzzlehttp/promises' => array(
             'pretty_version' => '1.5.3',
@@ -263,7 +254,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../guzzlehttp/promises',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'guzzlehttp/psr7' => array(
             'pretty_version' => '1.9.1',
@@ -272,7 +263,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../guzzlehttp/psr7',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'hamcrest/hamcrest-php' => array(
             'pretty_version' => 'v2.1.1',
@@ -295,169 +286,169 @@
         'illuminate/auth' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/broadcasting' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/bus' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/cache' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/config' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/console' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/container' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/contracts' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/cookie' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/database' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/encryption' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/events' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/filesystem' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/hashing' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/http' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/log' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/mail' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/notifications' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/pagination' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/pipeline' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/queue' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/redis' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/routing' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/session' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/support' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/translation' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/validation' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'illuminate/view' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v5.6.16',
+                0 => 'v5.7.29',
             ),
         ),
         'jakub-onderka/php-console-color' => array(
@@ -493,12 +484,39 @@
                 0 => '*',
             ),
         ),
+        'kylekatarnls/update-helper' => array(
+            'pretty_version' => '1.2.1',
+            'version' => '1.2.1.0',
+            'reference' => '429be50660ed8a196e0798e5939760f168ec8ce9',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../kylekatarnls/update-helper',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'laravel/framework' => array(
-            'pretty_version' => 'v5.6.16',
-            'version' => '5.6.16.0',
-            'reference' => 'fcdbc791bc3e113ada38ab0a1147141fb9ec2b16',
+            'pretty_version' => 'v5.7.29',
+            'version' => '5.7.29.0',
+            'reference' => '2555bf6ef6e6739e5f49f4a5d40f6264c57abd56',
             'type' => 'library',
             'install_path' => __DIR__ . '/../laravel/framework',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'laravel/nexmo-notification-channel' => array(
+            'pretty_version' => 'v1.0.1',
+            'version' => '1.0.1.0',
+            'reference' => '03edd42a55b306ff980c9950899d5a2b03260d48',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../laravel/nexmo-notification-channel',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'laravel/slack-notification-channel' => array(
+            'pretty_version' => 'v1.0.3',
+            'version' => '1.0.3.0',
+            'reference' => '6e164293b754a95f246faf50ab2bbea3e4923cc9',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../laravel/slack-notification-channel',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -508,6 +526,15 @@
             'reference' => 'ad571aacbac1539c30d480908f9d0c9614eaf1a7',
             'type' => 'library',
             'install_path' => __DIR__ . '/../laravel/tinker',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'lcobucci/jwt' => array(
+            'pretty_version' => '3.4.6',
+            'version' => '3.4.6.0',
+            'reference' => '3ef8657a78278dfeae7707d51747251db4176240',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../lcobucci/jwt',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -526,15 +553,6 @@
             'reference' => '2d6702ff215bf922936ccc1ad31007edc76451b9',
             'type' => 'library',
             'install_path' => __DIR__ . '/../league/mime-type-detection',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'lord/laroute' => array(
-            'pretty_version' => '2.4.7',
-            'version' => '2.4.7.0',
-            'reference' => '915501506ee5dfd07b9f9716537a16e1c66d4125',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../lord/laroute',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -593,11 +611,29 @@
             'dev_requirement' => false,
         ),
         'nesbot/carbon' => array(
-            'pretty_version' => '1.35.1',
-            'version' => '1.35.1.0',
-            'reference' => '5c05a2be472b22f63291d192410df9f0e0de3b19',
+            'pretty_version' => '1.39.1',
+            'version' => '1.39.1.0',
+            'reference' => '4be0c005164249208ce1b5ca633cd57bdd42ff33',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nesbot/carbon',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'nexmo/client' => array(
+            'pretty_version' => '1.9.1',
+            'version' => '1.9.1.0',
+            'reference' => 'c6d11d953c8c5594590bb9ebaba9616e76948f93',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../nexmo/client',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'nexmo/client-core' => array(
+            'pretty_version' => '1.8.1',
+            'version' => '1.8.1.0',
+            'reference' => '182d41a02ebd3e4be147baea45458ccfe2f528c4',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../nexmo/client-core',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -616,6 +652,15 @@
             'reference' => '30c1475f99ef8b439a1cf7d8a9c55787c80bbf71',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nwidart/laravel-modules',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'opis/closure' => array(
+            'pretty_version' => '3.7.0',
+            'version' => '3.7.0.0',
+            'reference' => 'b1a22a6be71c1263f3ca6e68f00b3fd4d394abc4',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../opis/closure',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -654,6 +699,45 @@
             'install_path' => __DIR__ . '/../phar-io/version',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'php-http/async-client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '1.0',
+            ),
+        ),
+        'php-http/client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '1.0',
+            ),
+        ),
+        'php-http/guzzle6-adapter' => array(
+            'pretty_version' => 'v1.1.1',
+            'version' => '1.1.1.0',
+            'reference' => 'a56941f9dc6110409cfcddc91546ee97039277ab',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-http/guzzle6-adapter',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'php-http/httplug' => array(
+            'pretty_version' => 'v1.1.0',
+            'version' => '1.1.0.0',
+            'reference' => '1c6381726c18579c4ca2ef1ec1498fdae8bdf018',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-http/httplug',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'php-http/promise' => array(
+            'pretty_version' => '1.3.1',
+            'version' => '1.3.1.0',
+            'reference' => 'fc85b1fba37c169a69a07ef0d5a8075770cc1f83',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-http/promise',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'phpunit/php-code-coverage' => array(
             'pretty_version' => '9.2.32',
@@ -724,6 +808,21 @@
                 0 => '1.0',
             ),
         ),
+        'psr/http-factory' => array(
+            'pretty_version' => '1.1.0',
+            'version' => '1.1.0.0',
+            'reference' => '2b4765fddfe3b508ac62f829e852b1501d3f6e8a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/http-factory',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'psr/http-factory-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '1.0',
+            ),
+        ),
         'psr/http-message' => array(
             'pretty_version' => '1.0.1',
             'version' => '1.0.1.0',
@@ -731,10 +830,10 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../psr/http-message',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'psr/http-message-implementation' => array(
-            'dev_requirement' => true,
+            'dev_requirement' => false,
             'provided' => array(
                 0 => '1.0',
             ),
@@ -789,7 +888,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../ralouphie/getallheaders',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
         'ramsey/uuid' => array(
             'pretty_version' => '3.9.6',
@@ -960,9 +1059,9 @@
             'dev_requirement' => true,
         ),
         'spatie/laravel-activitylog' => array(
-            'pretty_version' => '2.7.0',
-            'version' => '2.7.0.0',
-            'reference' => 'e354e84cee54565d59873dfd5826c57fff338c57',
+            'pretty_version' => '3.2.2',
+            'version' => '3.2.2.0',
+            'reference' => '8db5d2f314a26ee9a1617bdecd98947fdf29fcfa',
             'type' => 'library',
             'install_path' => __DIR__ . '/../spatie/laravel-activitylog',
             'aliases' => array(),
@@ -1312,6 +1411,15 @@
             'install_path' => __DIR__ . '/../webmozart/assert',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'zendframework/zend-diactoros' => array(
+            'pretty_version' => '2.2.1',
+            'version' => '2.2.1.0',
+            'reference' => 'de5847b068362a88684a55b0dbb40d85986cfa52',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../zendframework/zend-diactoros',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
     ),
 );
