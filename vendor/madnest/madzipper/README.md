@@ -25,7 +25,8 @@ You can now access Madzipper with the `Madzipper` alias.
 | Package  | Laravel            | PHP       |
 |:---------|:-------------------|:----------|
 | **v1.3** | `9.*`              | `^8.0`    |
-| **v1.2** | `8.*`              | `^8.0`    |
+| **v1.2** | `7.* / 8.*`        | `^8.0`    |
+| **v1.1** | `7.* / 8.*`        | `>=7.3`   |
 
 ## Simple Laravel example by using Madzipper facade
 

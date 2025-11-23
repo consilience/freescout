@@ -14,7 +14,6 @@ use Illuminate\Log\LogServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Events\EventServiceProvider;
 use Illuminate\Routing\RoutingServiceProvider;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
@@ -22,7 +21,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 
-class Application extends Container implements ApplicationContract, HttpKernelInterface
+class Application extends Container implements ApplicationContract
 {
     /**
      * The Laravel framework version.
@@ -369,11 +368,13 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the language files.
      *
+     * @param  string  $path
      * @return string
      */
-    public function langPath()
+    public function langPath($path = '')
     {
-        return $this->resourcePath().DIRECTORY_SEPARATOR.'lang';
+        $langPath = $this->resourcePath().DIRECTORY_SEPARATOR.'lang';
+        return $path ? $langPath.DIRECTORY_SEPARATOR.$path : $langPath;
     }
 
     /**
@@ -389,11 +390,13 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the storage directory.
      *
+     * @param  string  $path
      * @return string
      */
-    public function storagePath()
+    public function storagePath($path = '')
     {
-        return $this->storagePath ?: $this->basePath.DIRECTORY_SEPARATOR.'storage';
+        $storagePath = $this->storagePath ?: $this->basePath.DIRECTORY_SEPARATOR.'storage';
+        return $path ? $storagePath.DIRECTORY_SEPARATOR.$path : $storagePath;
     }
 
     /**
@@ -927,6 +930,16 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     }
 
     /**
+     * Get the application's maintenance mode manager.
+     *
+     * @return \Illuminate\Contracts\Foundation\MaintenanceMode
+     */
+    public function maintenanceMode()
+    {
+        return $this->make('Illuminate\Contracts\Foundation\MaintenanceMode');
+    }
+
+    /**
      * Throw an HttpException with the given data.
      *
      * @param  int     $code
@@ -948,10 +961,10 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Register a terminating callback with the application.
      *
-     * @param  \Closure  $callback
+     * @param  \Closure|string  $callback
      * @return $this
      */
-    public function terminating(Closure $callback)
+    public function terminating($callback)
     {
         $this->terminatingCallbacks[] = $callback;
 
