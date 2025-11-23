@@ -88,7 +88,7 @@ final class Highlighter implements HighlighterContract
     /**
      * Creates an instance of the Highlighter.
      */
-    public function __construct(ConsoleColor $color = null, bool $UTF8 = true)
+    public function __construct(?ConsoleColor $color = null, bool $UTF8 = true)
     {
         $this->color = $color ?: new ConsoleColor();
 

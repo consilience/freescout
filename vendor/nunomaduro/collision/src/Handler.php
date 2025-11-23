@@ -26,7 +26,7 @@ final class Handler extends AbstractHandler implements HandlerContract
     /**
      * Creates an instance of the Handler.
      */
-    public function __construct(WriterContract $writer = null)
+    public function __construct(?WriterContract $writer = null)
     {
         $this->writer = $writer ?: new Writer();
     }

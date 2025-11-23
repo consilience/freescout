@@ -11,27 +11,22 @@
 
 namespace Symfony\Component\Translation\Formatter;
 
-use Symfony\Component\Translation\MessageSelector;
-
 /**
  * @author Abdellatif Ait boudad <a.aitboudad@gmail.com>
  */
-class MessageFormatter implements MessageFormatterInterface, ChoiceMessageFormatterInterface
+class MessageFormatter implements MessageFormatterInterface
 {
-    private $selector;
-
     /**
-     * @param MessageSelector|null $selector The message selector for pluralization
+     * Constructor
      */
-    public function __construct(?MessageSelector $selector = null)
+    public function __construct()
     {
-        $this->selector = $selector ?: new MessageSelector();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function format($message, $locale, ?array $parameters = array())
+    public function format(string $message, string $locale, array $parameters = array()): string
     {
         return strtr($message, $parameters);
     }

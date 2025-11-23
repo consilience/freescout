@@ -585,7 +585,7 @@ return [
 
         // Autodiscovery did not work for this one, becasuse it's composer.json
         // does not have a `extra` section.
-        Codedge\Updater\UpdaterServiceProvider::class,
+        // Codedge\Updater\UpdaterServiceProvider::class, // Commented out - package not installed in Laravel 9
     ],
 
     /*

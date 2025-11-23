@@ -211,7 +211,7 @@ abstract class AbstractCloner implements ClonerInterface
      *
      * @return Data The cloned variable represented by a Data object
      */
-    public function cloneVar($var, $filter = 0)
+    public function cloneVar(mixed $var, $filter = 0): Data
     {
         $this->prevErrorHandler = set_error_handler(function ($type, $msg, $file, $line, $context = array()) {
             if (E_RECOVERABLE_ERROR === $type || E_USER_ERROR === $type) {

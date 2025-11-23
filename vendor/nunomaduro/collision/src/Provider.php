@@ -33,7 +33,7 @@ final class Provider implements ProviderContract
     /**
      * Creates a new instance of the Provider.
      */
-    public function __construct(RunInterface $run = null, HandlerContract $handler = null)
+    public function __construct(?RunInterface $run = null, ?HandlerContract $handler = null)
     {
         $this->run = $run ?: new Run();
         $this->handler = $handler ?: new Handler();

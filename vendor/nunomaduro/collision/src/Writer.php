@@ -89,10 +89,10 @@ final class Writer implements WriterContract
      * Creates an instance of the writer.
      */
     public function __construct(
-        SolutionsRepository $solutionsRepository = null,
-        OutputInterface $output = null,
-        ArgumentFormatterContract $argumentFormatter = null,
-        HighlighterContract $highlighter = null
+        ?SolutionsRepository $solutionsRepository = null,
+        ?OutputInterface $output = null,
+        ?ArgumentFormatterContract $argumentFormatter = null,
+        ?HighlighterContract $highlighter = null
     ) {
         $this->solutionsRepository = $solutionsRepository ?: new NullSolutionsRepository();
         $this->output = $output ?: new ConsoleOutput();

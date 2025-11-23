@@ -48,6 +48,20 @@ class Container implements ArrayAccess, ContainerContract
     protected $instances = [];
 
     /**
+     * The container's scoped instances.
+     *
+     * @var array
+     */
+    protected $scopedInstances = [];
+
+    /**
+     * The container's scoped bindings.
+     *
+     * @var array
+     */
+    protected $scopedBindings = [];
+
+    /**
      * The registered type aliases.
      *
      * @var array
@@ -330,6 +344,26 @@ class Container implements ArrayAccess, ContainerContract
     public function singleton($abstract, $concrete = null)
     {
         $this->bind($abstract, $concrete, true);
+    }
+
+    /**
+     * Register a scoped binding in the container.
+     *
+     * @param  string  $abstract
+     * @param  \Closure|string|null  $concrete
+     * @return void
+     */
+    public function scoped($abstract, $concrete = null)
+    {
+        if (is_null($concrete)) {
+            $concrete = $abstract;
+        }
+
+        $this->scopedBindings[$abstract] = $concrete;
+
+        if ($this->resolved($abstract)) {
+            $this->rebound($abstract);
+        }
     }
 
     /**
@@ -620,6 +654,13 @@ class Container implements ArrayAccess, ContainerContract
             return $this->instances[$abstract];
         }
 
+        // If the type is registered as a scoped binding, we'll return the existing
+        // scoped instance if one exists, or create and store a new instance for
+        // this request scope.
+        if (isset($this->scopedInstances[$abstract]) && ! $needsContextualBuild) {
+            return $this->scopedInstances[$abstract];
+        }
+
         $this->with[] = $parameters;
 
         $concrete = $this->getConcrete($abstract);
@@ -645,6 +686,13 @@ class Container implements ArrayAccess, ContainerContract
         // entirely new instance of an object on each subsequent request for it.
         if ($this->isShared($abstract) && ! $needsContextualBuild) {
             $this->instances[$abstract] = $object;
+        }
+
+        // If the requested type is registered as a scoped binding, we'll store it
+        // in the scoped instances array so it can be reused within this request
+        // scope but will be cleared between requests.
+        if (isset($this->scopedBindings[$abstract]) && ! $needsContextualBuild) {
+            $this->scopedInstances[$abstract] = $object;
         }
 
         $this->fireResolvingCallbacks($abstract, $object);

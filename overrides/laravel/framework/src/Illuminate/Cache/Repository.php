@@ -77,7 +77,7 @@ class Repository implements CacheContract, ArrayAccess
      * @param  mixed   $default
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         if (is_array($key)) {
             return $this->many($key);
@@ -237,12 +237,12 @@ class Repository implements CacheContract, ArrayAccess
      *
      * @param  string  $key
      * @param  mixed   $value
-     * @param  \DateTimeInterface|\DateInterval|float|int  $minutes
+     * @param  \DateTimeInterface|\DateInterval|float|int  $ttl
      * @return bool
      */
-    public function add($key, $value, $minutes)
+    public function add($key, $value, $ttl = null)
     {
-        if (is_null($minutes = $this->getMinutes($minutes))) {
+        if (is_null($ttl = $this->getMinutes($ttl))) {
             return false;
         }
 

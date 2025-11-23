@@ -44,6 +44,8 @@ abstract class Helper implements HelperInterface
      * @param string $string The string to check its length
      *
      * @return int The length of the string
+     *
+     * @deprecated since Symfony 5.3, use width() or length() instead
      */
     public static function strlen($string)
     {
@@ -52,6 +54,44 @@ abstract class Helper implements HelperInterface
         }
 
         return mb_strwidth($string ?? '', $encoding);
+    }
+
+    /**
+     * Returns the width of a string, using mb_strwidth if it is available.
+     * The width is how it is displayed on a terminal.
+     *
+     * @param string|null $string The string to check its width
+     *
+     * @return int The width of the string
+     */
+    public static function width(?string $string): int
+    {
+        $string = (string) $string;
+
+        if (false === $encoding = mb_detect_encoding($string, null, true)) {
+            return \strlen($string);
+        }
+
+        return mb_strwidth($string, $encoding);
+    }
+
+    /**
+     * Returns the length of a string, using mb_strlen if it is available.
+     * The length is related to how many bytes the string will use.
+     *
+     * @param string|null $string The string to check its length
+     *
+     * @return int The length of the string
+     */
+    public static function length(?string $string): int
+    {
+        $string = (string) $string;
+
+        if (false === $encoding = mb_detect_encoding($string, null, true)) {
+            return \strlen($string);
+        }
+
+        return mb_strlen($string, $encoding);
     }
 
     /**

@@ -22,6 +22,7 @@ use Symfony\Component\Translation\Formatter\ChoiceMessageFormatterInterface;
 use Symfony\Component\Translation\Formatter\MessageFormatter;
 use Symfony\Component\Translation\Formatter\MessageFormatterInterface;
 use Symfony\Component\Translation\Loader\LoaderInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -155,7 +156,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     /**
      * {@inheritdoc}
      */
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->locale;
     }
@@ -192,7 +193,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     /**
      * {@inheritdoc}
      */
-    public function trans($id, array $parameters = array(), $domain = null, $locale = null)
+    public function trans(string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null): string
     {
         if (null === $domain) {
             $domain = 'messages';
@@ -233,7 +234,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     /**
      * {@inheritdoc}
      */
-    public function getCatalogue($locale = null)
+    public function getCatalogue(?string $locale = null): MessageCatalogueInterface
     {
         if (null === $locale) {
             $locale = $this->getLocale();
@@ -246,6 +247,14 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
         }
 
         return $this->catalogues[$locale];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCatalogues(): array
+    {
+        return array_values($this->catalogues);
     }
 
     /**
