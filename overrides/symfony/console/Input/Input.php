@@ -80,7 +80,7 @@ abstract class Input implements InputInterface, StreamableInputInterface
     /**
      * {@inheritdoc}
      */
-    public function isInteractive()
+    public function isInteractive(): bool
     {
         return $this->interactive;
     }
@@ -96,7 +96,7 @@ abstract class Input implements InputInterface, StreamableInputInterface
     /**
      * {@inheritdoc}
      */
-    public function getArguments()
+    public function getArguments(): array
     {
         return array_merge($this->definition->getArgumentDefaults(), $this->arguments);
     }
@@ -128,7 +128,7 @@ abstract class Input implements InputInterface, StreamableInputInterface
     /**
      * {@inheritdoc}
      */
-    public function hasArgument($name)
+    public function hasArgument(string $name): bool
     {
         return $this->definition->hasArgument($name);
     }
@@ -136,7 +136,7 @@ abstract class Input implements InputInterface, StreamableInputInterface
     /**
      * {@inheritdoc}
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return array_merge($this->definition->getOptionDefaults(), $this->options);
     }
@@ -168,7 +168,7 @@ abstract class Input implements InputInterface, StreamableInputInterface
     /**
      * {@inheritdoc}
      */
-    public function hasOption($name)
+    public function hasOption(string $name): bool
     {
         return $this->definition->hasOption($name);
     }
