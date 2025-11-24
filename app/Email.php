@@ -32,6 +32,16 @@ class Email extends Model
     protected $guarded = ['id', 'customer_id'];
 
     /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return ['customer'];
+    }
+
+    /**
      * Get email's customer.
      */
     public function customer()

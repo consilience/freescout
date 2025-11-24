@@ -743,6 +743,25 @@ class Application extends Container implements ApplicationContract
     }
 
     /**
+     * Get the given type from the container (PSR-11).
+     *
+     * (Overriding Container::get)
+     *
+     * @param  string  $id
+     * @return mixed
+     */
+    public function get(string $id): mixed
+    {
+        $id = $this->getAlias($id);
+
+        if (isset($this->deferredServices[$id]) && ! isset($this->instances[$id])) {
+            $this->loadDeferredProvider($id);
+        }
+
+        return parent::get($id);
+    }
+
+    /**
      * Determine if the given abstract type has been bound.
      *
      * (Overriding Container::bound)

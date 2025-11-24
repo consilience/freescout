@@ -19,8 +19,9 @@ class AppServiceProvider extends ServiceProvider
         // "SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 767 bytes"
         Schema::defaultStringLength(191);
 
-        // Use Bootstrap pagination instead of Tailwind (Laravel 8 default)
-        Paginator::useBootstrap();
+        // Laravel 11: Pagination view configuration moved to config/pagination.php or blade templates
+        // TODO: Configure pagination views for Bootstrap in Laravel 11
+        // Paginator::defaultView('pagination::bootstrap-4');
 
         // Models observers
         \App\Mailbox::observe(\App\Observers\MailboxObserver::class);

@@ -160,6 +160,16 @@ class Mailbox extends Model
     }
 
     /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return ['users', 'conversations', 'folders'];
+    }
+
+    /**
      * Automatically encrypt password on save.
      */
     public function setInPasswordAttribute($value)

@@ -132,12 +132,12 @@ class HandleExceptions
      *
      * @param  array  $error
      * @param  int|null  $traceOffset
-     * @return \Symfony\Component\Debug\Exception\FatalErrorException
+     * @return \ErrorException
      */
     protected function fatalExceptionFromError(array $error, $traceOffset = null)
     {
-        return new FatalErrorException(
-            $error['message'], $error['type'], 0, $error['file'], $error['line'], $traceOffset
+        return new \ErrorException(
+            $error['message'], 0, $error['type'], $error['file'], $error['line']
         );
     }
 

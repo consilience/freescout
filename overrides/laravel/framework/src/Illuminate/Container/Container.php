@@ -164,9 +164,21 @@ class Container implements ArrayAccess, ContainerContract
      */
     public function bound($abstract)
     {
-        return isset($this->bindings[$abstract]) ||
-               isset($this->instances[$abstract]) ||
-               $this->isAlias($abstract);
+        if (isset($this->bindings[$abstract]) || isset($this->instances[$abstract])) {
+            return true;
+        }
+
+        if ($this->isAlias($abstract)) {
+            try {
+                $resolved = $this->getAlias($abstract);
+                return $resolved !== $abstract && $this->bound($resolved);
+            } catch (\Throwable $e) {
+                return false;
+            }
+        }
+
+        // Laravel 11: Don't consider unbound abstracts as "bound" even if they might be auto-resolvable
+        return false;
     }
 
     /**
