@@ -560,4 +560,16 @@ class Dispatcher implements DispatcherContract
 
         return $this;
     }
+
+    /**
+     * Set the transaction manager resolver callback.
+     *
+     * @param  callable  $resolver
+     * @return $this
+     */
+    public function setTransactionManagerResolver(callable $resolver)
+    {
+        // Transaction manager resolver - no-op for now as the override doesn't use transactions
+        return $this;
+    }
 }

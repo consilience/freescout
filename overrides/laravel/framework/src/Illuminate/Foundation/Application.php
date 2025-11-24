@@ -380,11 +380,13 @@ class Application extends Container implements ApplicationContract
     /**
      * Get the path to the public / web directory.
      *
+     * @param  string  $path
      * @return string
      */
-    public function publicPath()
+    public function publicPath($path = '')
     {
-        return $this->basePath.DIRECTORY_SEPARATOR.'public';
+        $publicPath = $this->basePath.DIRECTORY_SEPARATOR.'public';
+        return $path ? $publicPath.DIRECTORY_SEPARATOR.$path : $publicPath;
     }
 
     /**
@@ -937,6 +939,16 @@ class Application extends Container implements ApplicationContract
     public function maintenanceMode()
     {
         return $this->make('Illuminate\Contracts\Foundation\MaintenanceMode');
+    }
+
+    /**
+     * Determine if the application is currently in debug mode.
+     *
+     * @return bool
+     */
+    public function hasDebugModeEnabled()
+    {
+        return (bool) $this->make('config')->get('app.debug', false);
     }
 
     /**
