@@ -2293,7 +2293,7 @@ return array(
     'Illuminate\\Foundation\\Auth\\Access\\Authorizable' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/Auth/Access/Authorizable.php',
     'Illuminate\\Foundation\\Auth\\Access\\AuthorizesRequests' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/Auth/Access/AuthorizesRequests.php',
     'Illuminate\\Foundation\\Auth\\EmailVerificationRequest' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/Auth/EmailVerificationRequest.php',
-    'Illuminate\\Foundation\\Auth\\User' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/Auth/User.php',
+    'Illuminate\\Foundation\\Auth\\User' => $baseDir . '/overrides/laravel/framework/src/Illuminate/Foundation/Auth/User.php',
     'Illuminate\\Foundation\\Bootstrap\\BootProviders' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php',
     'Illuminate\\Foundation\\Bootstrap\\HandleExceptions' => $baseDir . '/overrides/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php',
     'Illuminate\\Foundation\\Bootstrap\\LoadConfiguration' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php',
