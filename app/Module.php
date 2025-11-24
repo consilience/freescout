@@ -12,6 +12,16 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 class Module extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     const IMG_DEFAULT = '/img/default-module.png';
 
     public $timestamps = false;

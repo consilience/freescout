@@ -25,6 +25,16 @@ class Conversation extends Model
     public $rememberCacheDriver = 'array';
 
     /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
+
+    /**
      * Max length of the preview.
      */
     const PREVIEW_MAXLENGTH = 255;

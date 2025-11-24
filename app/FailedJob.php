@@ -6,6 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class FailedJob extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     /**
      * Automatically converted into Carbon dates.
      */

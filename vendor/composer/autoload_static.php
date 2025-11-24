@@ -3764,7 +3764,7 @@ class ComposerStaticInitdb02a29b244f6c3e857e1949a0370113
         'Illuminate\\Notifications\\Channels\\DatabaseChannel' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Notifications/Channels/DatabaseChannel.php',
         'Illuminate\\Notifications\\Channels\\MailChannel' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Notifications/Channels/MailChannel.php',
         'Illuminate\\Notifications\\Console\\NotificationTableCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Notifications/Console/NotificationTableCommand.php',
-        'Illuminate\\Notifications\\DatabaseNotification' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Notifications/DatabaseNotification.php',
+        'Illuminate\\Notifications\\DatabaseNotification' => __DIR__ . '/../..' . '/overrides/laravel/framework/src/Illuminate/Notifications/DatabaseNotification.php',
         'Illuminate\\Notifications\\DatabaseNotificationCollection' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Notifications/DatabaseNotificationCollection.php',
         'Illuminate\\Notifications\\Events\\BroadcastNotificationCreated' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Notifications/Events/BroadcastNotificationCreated.php',
         'Illuminate\\Notifications\\Events\\NotificationFailed' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Notifications/Events/NotificationFailed.php',

@@ -2561,7 +2561,7 @@ return array(
     'Illuminate\\Notifications\\Channels\\DatabaseChannel' => $vendorDir . '/laravel/framework/src/Illuminate/Notifications/Channels/DatabaseChannel.php',
     'Illuminate\\Notifications\\Channels\\MailChannel' => $vendorDir . '/laravel/framework/src/Illuminate/Notifications/Channels/MailChannel.php',
     'Illuminate\\Notifications\\Console\\NotificationTableCommand' => $vendorDir . '/laravel/framework/src/Illuminate/Notifications/Console/NotificationTableCommand.php',
-    'Illuminate\\Notifications\\DatabaseNotification' => $vendorDir . '/laravel/framework/src/Illuminate/Notifications/DatabaseNotification.php',
+    'Illuminate\\Notifications\\DatabaseNotification' => $baseDir . '/overrides/laravel/framework/src/Illuminate/Notifications/DatabaseNotification.php',
     'Illuminate\\Notifications\\DatabaseNotificationCollection' => $vendorDir . '/laravel/framework/src/Illuminate/Notifications/DatabaseNotificationCollection.php',
     'Illuminate\\Notifications\\Events\\BroadcastNotificationCreated' => $vendorDir . '/laravel/framework/src/Illuminate/Notifications/Events/BroadcastNotificationCreated.php',
     'Illuminate\\Notifications\\Events\\NotificationFailed' => $vendorDir . '/laravel/framework/src/Illuminate/Notifications/Events/NotificationFailed.php',

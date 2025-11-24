@@ -28,6 +28,16 @@ class User extends Authenticatable
 
     public $rememberCacheDriver = 'array';
 
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     const PHOTO_DIRECTORY = 'users';
     const PHOTO_QUALITY = 77;
 

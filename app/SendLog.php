@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class SendLog extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     /**
      * Status of the email sent to the customer or user.
      * https://documentation.mailgun.com/en/latest/api-events.html#event-types.
