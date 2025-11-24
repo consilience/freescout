@@ -542,4 +542,35 @@ final class Run implements RunInterface
 
         return $this;
     }
+
+    /**
+     * Get all frame filters.
+     *
+     * @return array
+     */
+    public function getFrameFilters()
+    {
+        return [];
+    }
+
+    /**
+     * Clear all frame filters.
+     *
+     * @return void
+     */
+    public function clearFrameFilters()
+    {
+        // No-op for this override
+    }
+
+    /**
+     * Add a frame filter.
+     *
+     * @param callable $filter
+     * @return void
+     */
+    public function addFrameFilter($filterCallback)
+    {
+        // No-op for this override
+    }
 }

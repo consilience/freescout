@@ -4,11 +4,10 @@ namespace Illuminate\Foundation\Bootstrap;
 
 use Exception;
 use ErrorException;
+use Throwable;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 class HandleExceptions
 {
@@ -73,9 +72,8 @@ class HandleExceptions
      */
     public function handleException($e)
     {
-        if (! $e instanceof Exception) {
-            $e = new FatalThrowableError($e);
-        }
+        // In modern PHP/Laravel, all errors are Throwable
+        // No need to convert to FatalThrowableError
 
         try {
             $this->getExceptionHandler()->report($e);
@@ -101,7 +99,7 @@ class HandleExceptions
      * @param  \Exception  $e
      * @return void
      */
-    protected function renderForConsole(Exception $e)
+    protected function renderForConsole(Throwable $e)
     {
         $this->getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
     }
