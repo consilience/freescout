@@ -102,7 +102,7 @@ class ConsoleOutput extends StreamOutput implements ConsoleOutputInterface
     /**
      * {@inheritdoc}
      */
-    public function setErrorOutput(OutputInterface $error)
+    public function setErrorOutput(OutputInterface $error): void
     {
         $this->stderr = $error;
     }

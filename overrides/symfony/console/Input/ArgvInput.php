@@ -318,7 +318,7 @@ class ArgvInput extends Input
     /**
      * {@inheritdoc}
      */
-    public function getParameterOption($values, $default = false, $onlyParams = false)
+    public function getParameterOption(array|string $values, array|string|int|float|bool|null $default = false, bool $onlyParams = false): mixed
     {
         $values = (array) $values;
         $tokens = $this->tokens;

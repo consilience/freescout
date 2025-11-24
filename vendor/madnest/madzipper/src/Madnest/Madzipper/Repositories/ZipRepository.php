@@ -7,29 +7,23 @@ use ZipArchive;
 
 class ZipRepository implements RepositoryInterface
 {
-    private $archive;
+    private ?ZipArchive $archive = null;
 
     public bool $open = false;
 
     /**
      * Construct with a given path.
      *
-     * @param $filePath
-     * @param bool $create
-     * @param ZipArchive $archive
-     *
      * @throws \Exception
-     *
-     * @return ZipRepository
      */
-    public function __construct($filePath, $create = false, $archive = null)
+    public function __construct(string $filePath, bool $create = false, mixed $archive = null)
     {
         // Check if ZipArchive is available
         if (! class_exists('ZipArchive')) {
             throw new Exception('Error: Your PHP version is not compiled with zip support');
         }
 
-        $this->archive = $archive ? $archive : new ZipArchive();
+        $this->archive = $archive ? $archive : new ZipArchive;
 
         $this->open($filePath, $create);
     }
@@ -37,17 +31,14 @@ class ZipRepository implements RepositoryInterface
     /**
      * Open the archive.
      *
-     * @param mixed $filePath
-     * @param bool $create
-     * @return void
      * @throws Exception
      */
-    protected function open($filePath, $create = false): void
+    protected function open(string $filePath, bool $create = false): void
     {
-        $res = $this->archive->open($filePath, ($create ? ZipArchive::CREATE : null));
+        $res = $this->archive->open($filePath, ($create ? ZipArchive::CREATE : 0));
 
         if ($res !== true) {
-            throw new Exception("Error: Failed to open $filePath! Error: ".$this->getErrorMessage($res));
+            throw new Exception("Error: Failed to open {$filePath}! Error: ".$this->getErrorMessage($res));
         }
 
         $this->open = true;
@@ -55,8 +46,6 @@ class ZipRepository implements RepositoryInterface
 
     /**
      * Check if the archive is open.
-     *
-     * @return bool
      */
     public function isOpen(): bool
     {
@@ -65,8 +54,6 @@ class ZipRepository implements RepositoryInterface
 
     /**
      * Check if the archive is closed.
-     *
-     * @return bool
      */
     public function isClosed(): bool
     {
@@ -75,42 +62,32 @@ class ZipRepository implements RepositoryInterface
 
     /**
      * Add a file to the opened Archive.
-     *
-     * @param $pathToFile
-     * @param $pathInArchive
      */
-    public function addFile($pathToFile, $pathInArchive)
+    public function addFile(string $pathToFile, string $pathInArchive): void
     {
         $this->archive->addFile($pathToFile, $pathInArchive);
     }
 
     /**
      * Add an empty directory.
-     *
-     * @param $dirName
      */
-    public function addEmptyDir($dirName)
+    public function addEmptyDir(string $dirName): void
     {
         $this->archive->addEmptyDir($dirName);
     }
 
     /**
      * Add a file to the opened Archive using its contents.
-     *
-     * @param $name
-     * @param $content
      */
-    public function addFromString($name, $content)
+    public function addFromString(string $name, string $content): void
     {
         $this->archive->addFromString($name, $content);
     }
 
     /**
      * Remove a file permanently from the Archive.
-     *
-     * @param $pathInArchive
      */
-    public function removeFile($pathInArchive)
+    public function removeFile(string $pathInArchive): void
     {
         $this->archive->deleteName($pathInArchive);
     }
@@ -118,23 +95,17 @@ class ZipRepository implements RepositoryInterface
     /**
      * Get the content of a file.
      *
-     * @param $pathInArchive
-     *
      * @return string
      */
-    public function getFileContent($pathInArchive)
+    public function getFileContent(string $pathInArchive): string|false
     {
         return $this->archive->getFromName($pathInArchive);
     }
 
     /**
      * Get the stream of a file.
-     *
-     * @param $pathInArchive
-     *
-     * @return mixed
      */
-    public function getFileStream($pathInArchive)
+    public function getFileStream(string $pathInArchive): mixed
     {
         return $this->archive->getStream($pathInArchive);
     }
@@ -142,13 +113,11 @@ class ZipRepository implements RepositoryInterface
     /**
      * Will loop over every item in the archive and will execute the callback on them
      * Will provide the filename for every item.
-     *
-     * @param $callback
      */
-    public function each($callback)
+    public function each(callable $callback): void
     {
         for ($i = 0; $i < $this->archive->numFiles; $i++) {
-            //skip if folder
+            // skip if folder
             $stats = $this->archive->statIndex($i);
             if ($stats['size'] === 0 && $stats['crc'] === 0) {
                 continue;
@@ -159,12 +128,8 @@ class ZipRepository implements RepositoryInterface
 
     /**
      * Checks whether the file is in the archive.
-     *
-     * @param $fileInArchive
-     *
-     * @return bool
      */
-    public function fileExists($fileInArchive)
+    public function fileExists(string $fileInArchive): bool
     {
         return $this->archive->locateName($fileInArchive) !== false;
     }
@@ -172,30 +137,22 @@ class ZipRepository implements RepositoryInterface
     /**
      * Sets the password to be used for decompressing
      * function named usePassword for clarity.
-     *
-     * @param $password
-     *
-     * @return bool
      */
-    public function usePassword($password)
+    public function usePassword(string $password): bool
     {
         return $this->archive->setPassword($password);
     }
 
     /**
      * Returns the status of the archive as a string.
-     *
-     * @return string
      */
-    public function getStatus()
+    public function getStatus(): string|false
     {
         return $this->archive->getStatusString();
     }
 
     /**
      * Closes the archive and saves it.
-     *
-     * @return bool
      */
     public function close(): bool
     {
@@ -207,10 +164,9 @@ class ZipRepository implements RepositoryInterface
     /**
      * Get error message.
      *
-     * @param mixed $resultCode
-     * @return string
+     * @param  mixed  $resultCode
      */
-    private function getErrorMessage($resultCode): string
+    private function getErrorMessage(int $resultCode): string
     {
         switch ($resultCode) {
             case ZipArchive::ER_EXISTS:
@@ -230,7 +186,7 @@ class ZipRepository implements RepositoryInterface
             case ZipArchive::ER_SEEK:
                 return 'ZipArchive::ER_SEEK - Seek error.';
             default:
-                return "An unknown error [$resultCode] has occurred.";
+                return "An unknown error [{$resultCode}] has occurred.";
         }
     }
 }

@@ -17,7 +17,7 @@ use Throwable;
 final class Cloner
 {
     /**
-     * @psalm-template OriginalType
+     * @psalm-template OriginalType of object
      *
      * @psalm-param OriginalType $original
      *
@@ -27,7 +27,7 @@ final class Cloner
     {
         try {
             return clone $original;
-        } catch (Throwable $t) {
+        } catch (Throwable) {
             return $original;
         }
     }

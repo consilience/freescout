@@ -127,7 +127,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function writeln($messages, $options = self::OUTPUT_NORMAL)
+    public function writeln(\Traversable|array|string $messages, int $options = 0): void
     {
         $this->write($messages, true, $options);
     }
@@ -135,7 +135,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function write($messages, $newline = false, $options = self::OUTPUT_NORMAL)
+    public function write(\Traversable|array|string $messages, bool $newline = false, int $options = 0): void
     {
         $messages = (array) $messages;
 
