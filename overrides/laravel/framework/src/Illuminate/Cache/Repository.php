@@ -89,11 +89,11 @@ class Repository implements CacheContract, ArrayAccess
         // the default value for this cache value. This default could be a callback
         // so we will execute the value function which will resolve it if needed.
         if (is_null($value)) {
-            $this->event(new CacheMissed($key));
+            $this->event(new CacheMissed($this->getStoreName(), $key));
 
             $value = value($default);
         } else {
-            $this->event(new CacheHit($key, $value));
+            $this->event(new CacheHit($this->getStoreName(), $key, $value));
         }
 
         return $value;
@@ -150,7 +150,7 @@ class Repository implements CacheContract, ArrayAccess
         // the default value for this cache value. This default could be a callback
         // so we will execute the value function which will resolve it if needed.
         if (is_null($value)) {
-            $this->event(new CacheMissed($key));
+            $this->event(new CacheMissed($this->getStoreName(), $key));
 
             return isset($keys[$key]) ? value($keys[$key]) : null;
         }
@@ -158,7 +158,7 @@ class Repository implements CacheContract, ArrayAccess
         // If we found a valid value we will fire the "hit" event and return the value
         // back from this function. The "hit" event gives developers an opportunity
         // to listen for every possible cache "hit" throughout this applications.
-        $this->event(new CacheHit($key, $value));
+        $this->event(new CacheHit($this->getStoreName(), $key, $value));
 
         return $value;
     }
@@ -576,6 +576,18 @@ class Repository implements CacheContract, ArrayAccess
         }
 
         return $this->store->$method(...$parameters);
+    }
+
+    /**
+     * Get the cache store name.
+     *
+     * @return string
+     */
+    protected function getStoreName()
+    {
+        return method_exists($this->store, 'getStoreName')
+            ? $this->store->getStoreName()
+            : 'unknown';
     }
 
     /**

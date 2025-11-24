@@ -1690,6 +1690,22 @@ class Carbon extends DateTime implements JsonSerializable
     }
 
     /**
+     * Set the fallback locale.
+     *
+     * @param string $locale
+     *
+     * @return void
+     */
+    public static function setFallbackLocale($locale)
+    {
+        $translator = static::translator();
+
+        if (method_exists($translator, 'setFallbackLocales')) {
+            $translator->setFallbackLocales([$locale]);
+        }
+    }
+
+    /**
      * Set the current locale to the given, execute the passed function, reset the locale to previous one,
      * then return the result of the closure (or null if the closure was void).
      *

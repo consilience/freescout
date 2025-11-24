@@ -57,19 +57,50 @@ class Dispatcher implements DispatcherContract
     /**
      * Register an event listener with the dispatcher.
      *
-     * @param  string|array  $events
-     * @param  mixed  $listener
+     * @param  \Closure|string|array  $events
+     * @param  \Closure|string|array|null  $listener
      * @return void
      */
     public function listen($events, $listener = null)
     {
+        // Laravel 11: Support closure-based event discovery
+        if ($events instanceof \Closure && is_null($listener)) {
+            $listener = $events;
+            $events = $this->firstClosureParameterType($listener);
+        }
+
         foreach ((array) $events as $event) {
-            if (Str::contains($event, '*')) {
+            if (is_string($event) && Str::contains($event, '*')) {
                 $this->setupWildcardListen($event, $listener);
             } else {
                 $this->listeners[$event][] = $this->makeListener($listener);
             }
         }
+    }
+
+    /**
+     * Get the first parameter type of a closure.
+     *
+     * @param  \Closure  $closure
+     * @return string
+     */
+    protected function firstClosureParameterType(\Closure $closure)
+    {
+        $reflection = new \ReflectionFunction($closure);
+
+        $parameters = $reflection->getParameters();
+
+        if (count($parameters) === 0) {
+            return 'unknown';
+        }
+
+        $type = $parameters[0]->getType();
+
+        if (! $type instanceof \ReflectionNamedType) {
+            return 'unknown';
+        }
+
+        return $type->getName();
     }
 
     /**
