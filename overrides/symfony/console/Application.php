@@ -138,9 +138,10 @@ class Application
             }
         }
 
-        if (null !== $this->dispatcher && $this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
-            @trigger_error(sprintf('The "ConsoleEvents::EXCEPTION" event is deprecated since Symfony 3.3 and will be removed in 4.0. Listen to the "ConsoleEvents::ERROR" event instead.'), \E_USER_DEPRECATED);
-        }
+        // Symfony 7: ConsoleEvents::EXCEPTION was removed - this check is no longer needed
+        // if (null !== $this->dispatcher && $this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
+        //     @trigger_error(sprintf('The "ConsoleEvents::EXCEPTION" event is deprecated since Symfony 3.3 and will be removed in 4.0. Listen to the "ConsoleEvents::ERROR" event instead.'), \E_USER_DEPRECATED);
+        // }
 
         $this->configureIO($input, $output);
 
@@ -240,7 +241,7 @@ class Application
         if (null !== $e) {
             if (null !== $this->dispatcher) {
                 $event = new ConsoleErrorEvent($input, $output, $e);
-                $this->dispatcher->dispatch(ConsoleEvents::ERROR, $event);
+                $this->dispatcher->dispatch($event, ConsoleEvents::ERROR);
                 $e = $event->getError();
 
                 if (0 === $event->getExitCode()) {
@@ -1009,13 +1010,14 @@ class Application
                 $inputStream = $input->getStream();
             }
 
-            // This check ensures that calling QuestionHelper::setInputStream() works
-            // To be removed in 4.0 (in the same time as QuestionHelper::setInputStream)
-            if (!$inputStream && $this->getHelperSet()->has('question')) {
-                $inputStream = $this->getHelperSet()->get('question')->getInputStream(false);
-            }
+            // Symfony 7: QuestionHelper::getInputStream() was removed
+            // This check ensured that calling QuestionHelper::setInputStream() worked
+            // Removed in Symfony 4.0+ (we are now on Symfony 7)
+            // if (!$inputStream && $this->getHelperSet()->has('question')) {
+            //     $inputStream = $this->getHelperSet()->get('question')->getInputStream(false);
+            // }
 
-            if (!@posix_isatty($inputStream) && false === getenv('SHELL_INTERACTIVE')) {
+            if ($inputStream && !@posix_isatty($inputStream) && false === getenv('SHELL_INTERACTIVE')) {
                 $input->setInteractive(false);
             }
         }
@@ -1085,7 +1087,7 @@ class Application
         $e = null;
 
         try {
-            $this->dispatcher->dispatch(ConsoleEvents::COMMAND, $event);
+            $this->dispatcher->dispatch($event, ConsoleEvents::COMMAND);
 
             if ($event->commandShouldRun()) {
                 $exitCode = $command->run($input, $output);
@@ -1096,17 +1098,19 @@ class Application
         } catch (\Throwable $e) {
         }
         if (null !== $e) {
-            if ($this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
-                $x = $e instanceof \Exception ? $e : new FatalThrowableError($e);
-                $event = new ConsoleExceptionEvent($command, $input, $output, $x, $x->getCode());
-                $this->dispatcher->dispatch(ConsoleEvents::EXCEPTION, $event);
-
-                if ($x !== $event->getException()) {
-                    $e = $event->getException();
-                }
-            }
+            // Symfony 7: ConsoleEvents::EXCEPTION was removed in Symfony 4.0
+            // Only ConsoleEvents::ERROR is supported now
+            // if ($this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
+            //     $x = $e instanceof \Exception ? $e : new FatalThrowableError($e);
+            //     $event = new ConsoleExceptionEvent($command, $input, $output, $x, $x->getCode());
+            //     $this->dispatcher->dispatch(ConsoleEvents::EXCEPTION, $event);
+            //
+            //     if ($x !== $event->getException()) {
+            //         $e = $event->getException();
+            //     }
+            // }
             $event = new ConsoleErrorEvent($input, $output, $e, $command);
-            $this->dispatcher->dispatch(ConsoleEvents::ERROR, $event);
+            $this->dispatcher->dispatch($event, ConsoleEvents::ERROR);
             $e = $event->getError();
 
             if (0 === $exitCode = $event->getExitCode()) {
@@ -1115,7 +1119,7 @@ class Application
         }
 
         $event = new ConsoleTerminateEvent($command, $input, $output, $exitCode);
-        $this->dispatcher->dispatch(ConsoleEvents::TERMINATE, $event);
+        $this->dispatcher->dispatch($event, ConsoleEvents::TERMINATE);
 
         if (null !== $e) {
             throw $e;

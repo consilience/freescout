@@ -22,9 +22,9 @@ class ModuleLaroute extends Command
     protected $description = 'Generate a laravel routes JS-file for a module or all modules (if module_alias is empty)';
 
     public $routes;
-    
+
     public $config;
-    
+
     public $generator;
 
     /**
@@ -34,12 +34,21 @@ class ModuleLaroute extends Command
      */
     public function __construct()
     {
-        $app = app();
-
-        $this->config = $app['config'];
-        $this->generator = $app->make('Lord\Laroute\Generators\GeneratorInterface');
-
         parent::__construct();
+    }
+
+    /**
+     * Initialize the command dependencies (Laravel 11 compatibility).
+     *
+     * @return void
+     */
+    protected function initializeDependencies()
+    {
+        if (!$this->config) {
+            $app = app();
+            $this->config = $app['config'];
+            $this->generator = $app->make('Lord\Laroute\Generators\GeneratorInterface');
+        }
     }
 
     /**
@@ -49,6 +58,8 @@ class ModuleLaroute extends Command
      */
     public function handle()
     {
+        $this->initializeDependencies();
+
         $all = false;
         $modules = [];
 

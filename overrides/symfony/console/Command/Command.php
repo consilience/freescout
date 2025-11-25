@@ -29,6 +29,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Command
 {
+    public const SUCCESS = 0;
+    public const FAILURE = 1;
+    public const INVALID = 2;
+
     /**
      * @var string|null The default command name
      */
@@ -461,11 +465,11 @@ class Command
     /**
      * @param bool $hidden Whether or not the command should be hidden from the list of commands
      *
-     * @return Command The current instance
+     * @return static The current instance
      */
-    public function setHidden($hidden)
+    public function setHidden(bool $hidden = true): static
     {
-        $this->hidden = (bool) $hidden;
+        $this->hidden = $hidden;
 
         return $this;
     }
