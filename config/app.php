@@ -542,6 +542,7 @@ return [
         Illuminate\Bus\BusServiceProvider::class,
         Illuminate\Cache\CacheServiceProvider::class,
         // Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class, // Removed in Laravel 11
+        // ArtisanServiceProvider is deferred and will be auto-loaded when needed
         Illuminate\Cookie\CookieServiceProvider::class,
         Illuminate\Database\DatabaseServiceProvider::class,
         Illuminate\Encryption\EncryptionServiceProvider::class,
