@@ -10,11 +10,11 @@
         }
     ],
     "require": {
-        "php": "^8.2.0",
+        "php": "^8.3.0",
 
         "symfony/error-handler": "^7.0",
         "devfactory/minify": "^1.0.7|^2.0",
-        "laravel/framework": "^11.0",
+        "laravel/framework": "^12.0",
         "laravel/tinker": "^2.5",
         "laravel/helpers": "^1.4",
         "laravel/legacy-factories": "^1.0",
@@ -42,7 +42,7 @@
         "filp/whoops": "^2.14.6",
         "fakerphp/faker": "^1.9.1",
         "mockery/mockery": "1.1.0",
-        "nunomaduro/collision": "^8.1",
+        "nunomaduro/collision": "^9.0",
         "phpunit/phpunit": "^10.5",
 
         "symfony/polyfill-ctype": "^1.10",
