@@ -987,6 +987,18 @@ class Carbon extends DateTime implements JsonSerializable
     }
 
     /**
+     * Returns the precise timestamp as a float with microsecond precision (Carbon 3 compatibility).
+     *
+     * @param int $precision
+     *
+     * @return float
+     */
+    public function getPreciseTimestamp($precision = 6): float
+    {
+        return round(((float) $this->format('U.u')) / pow(10, 6 - $precision));
+    }
+
+    /**
      * Make a Carbon instance from given variable if possible.
      *
      * Always return a new instance. Parse only strings and only these likely to be dates (skip intervals

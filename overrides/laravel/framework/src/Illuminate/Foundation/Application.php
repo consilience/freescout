@@ -136,6 +136,13 @@ class Application extends Container implements ApplicationContract
     protected $namespace;
 
     /**
+     * The environment resolver callback (Laravel 12).
+     *
+     * @var callable|null
+     */
+    protected static $environmentResolver;
+
+    /**
      * Create a new Illuminate application instance.
      *
      * @param  string|null  $basePath
@@ -531,6 +538,19 @@ class Application extends Container implements ApplicationContract
             : null;
 
         return $this['env'] = (new EnvironmentDetector)->detect($callback, $args);
+    }
+
+    /**
+     * Set the environment resolver callback (Laravel 12).
+     *
+     * @param  callable  $callback
+     * @return $this
+     */
+    public function resolveEnvironmentUsing(callable $callback)
+    {
+        static::$environmentResolver = $callback;
+
+        return $this;
     }
 
     /**

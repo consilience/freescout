@@ -13,6 +13,5 @@ return array(
     'JShrink' => array($vendorDir . '/tedivm/jshrink/src'),
     'HTMLPurifier_' => array($baseDir . '/overrides/ezyang/htmlpurifier/library'),
     'HTMLPurifier' => array($vendorDir . '/ezyang/htmlpurifier/library'),
-    'Doctrine\\Common\\Collections\\' => array($vendorDir . '/doctrine/collections/lib'),
     '' => array($vendorDir . '/devfactory/minify/src'),
 );
