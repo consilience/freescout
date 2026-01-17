@@ -3,19 +3,14 @@
 namespace Illuminate\Auth\Middleware;
 
 use Closure;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Contracts\Auth\Factory as Auth;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+
+use function Illuminate\Support\enum_value;
 
 class Authorize
 {
-    /**
-     * The authentication factory instance.
-     *
-     * @var \Illuminate\Contracts\Auth\Factory
-     */
-    protected $auth;
-
     /**
      * The gate instance.
      *
@@ -26,14 +21,23 @@ class Authorize
     /**
      * Create a new middleware instance.
      *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth
      * @param  \Illuminate\Contracts\Auth\Access\Gate  $gate
-     * @return void
      */
-    public function __construct(Auth $auth, Gate $gate)
+    public function __construct(Gate $gate)
     {
-        $this->auth = $auth;
         $this->gate = $gate;
+    }
+
+    /**
+     * Specify the ability and models for the middleware.
+     *
+     * @param  \UnitEnum|string  $ability
+     * @param  string  ...$models
+     * @return string
+     */
+    public static function using($ability, ...$models)
+    {
+        return static::class.':'.implode(',', [enum_value($ability), ...$models]);
     }
 
     /**
@@ -42,7 +46,7 @@ class Authorize
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @param  string  $ability
-     * @param  array|null  $models
+     * @param  array|null  ...$models
      * @return mixed
      *
      * @throws \Illuminate\Auth\AuthenticationException
@@ -50,8 +54,6 @@ class Authorize
      */
     public function handle($request, Closure $next, $ability, ...$models)
     {
-        $this->auth->authenticate();
-
         $this->gate->authorize($ability, $this->getGateArguments($request, $models));
 
         return $next($request);
@@ -62,7 +64,7 @@ class Authorize
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  array|null  $models
-     * @return array|string|\Illuminate\Database\Eloquent\Model
+     * @return array
      */
     protected function getGateArguments($request, $models)
     {
@@ -70,9 +72,9 @@ class Authorize
             return [];
         }
 
-        return collect($models)->map(function ($model) use ($request) {
-            return $model instanceof Model ? $model : $this->getModel($request, $model);
-        })->all();
+        return (new Collection($models))
+            ->map(fn ($model) => $model instanceof Model ? $model : $this->getModel($request, $model))
+            ->all();
     }
 
     /**
@@ -84,7 +86,12 @@ class Authorize
      */
     protected function getModel($request, $model)
     {
-        return $this->isClassName($model) ? $model : $request->route($model);
+        if ($this->isClassName($model)) {
+            return trim($model);
+        }
+
+        return $request->route($model, null) ??
+            ((preg_match("/^['\"](.*)['\"]$/", trim($model), $matches)) ? $matches[1] : null);
     }
 
     /**
@@ -95,6 +102,6 @@ class Authorize
      */
     protected function isClassName($value)
     {
-        return strpos($value, '\\') !== false;
+        return str_contains($value, '\\');
     }
 }

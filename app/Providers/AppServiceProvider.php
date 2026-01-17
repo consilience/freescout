@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
         // To avoid MySQL error in packages:
         // "SQLSTATE[42000]: Syntax error or access violation: 1071 Specified key was too long; max key length is 767 bytes"
         Schema::defaultStringLength(191);
+
+        // Laravel 11: Pagination view configuration moved to config/pagination.php or blade templates
+        // TODO: Configure pagination views for Bootstrap in Laravel 11
+        // Paginator::defaultView('pagination::bootstrap-4');
 
         // Models observers
         \App\Mailbox::observe(\App\Observers\MailboxObserver::class);

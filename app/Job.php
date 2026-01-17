@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Job extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
 	const UPDATED_AT = null;
 
 	public $payload_decoded = null;

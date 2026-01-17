@@ -2,10 +2,13 @@
 
 namespace Illuminate\Cache;
 
-use Illuminate\Support\InteractsWithTime;
+use Illuminate\Contracts\Cache\Lock as LockContract;
 use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Support\InteractsWithTime;
+use Illuminate\Support\Sleep;
+use Illuminate\Support\Str;
 
-abstract class Lock
+abstract class Lock implements LockContract
 {
     use InteractsWithTime;
 
@@ -24,15 +27,34 @@ abstract class Lock
     protected $seconds;
 
     /**
+     * The scope identifier of this lock.
+     *
+     * @var string
+     */
+    protected $owner;
+
+    /**
+     * The number of milliseconds to wait before re-attempting to acquire a lock while blocking.
+     *
+     * @var int
+     */
+    protected $sleepMilliseconds = 250;
+
+    /**
      * Create a new lock instance.
      *
      * @param  string  $name
      * @param  int  $seconds
-     * @return void
+     * @param  string|null  $owner
      */
-    public function __construct($name, $seconds)
+    public function __construct($name, $seconds, $owner = null)
     {
+        if (is_null($owner)) {
+            $owner = Str::random();
+        }
+
         $this->name = $name;
+        $this->owner = $owner;
         $this->seconds = $seconds;
     }
 
@@ -44,19 +66,35 @@ abstract class Lock
     abstract public function acquire();
 
     /**
+     * Release the lock.
+     *
+     * @return bool
+     */
+    abstract public function release();
+
+    /**
+     * Returns the owner value written into the driver for this lock.
+     *
+     * @return string
+     */
+    abstract protected function getCurrentOwner();
+
+    /**
      * Attempt to acquire the lock.
      *
      * @param  callable|null  $callback
-     * @return bool
+     * @return mixed
      */
     public function get($callback = null)
     {
         $result = $this->acquire();
 
         if ($result && is_callable($callback)) {
-            return tap($callback(), function () {
+            try {
+                return $callback();
+            } finally {
                 $this->release();
-            });
+            }
         }
 
         return $result;
@@ -67,27 +105,78 @@ abstract class Lock
      *
      * @param  int  $seconds
      * @param  callable|null  $callback
-     * @return bool
+     * @return mixed
+     *
      * @throws \Illuminate\Contracts\Cache\LockTimeoutException
      */
     public function block($seconds, $callback = null)
     {
-        $starting = $this->currentTime();
+        $starting = ((int) now()->format('Uu')) / 1000;
+
+        $milliseconds = $seconds * 1000;
 
         while (! $this->acquire()) {
-            usleep(250 * 1000);
+            $now = ((int) now()->format('Uu')) / 1000;
 
-            if ($this->currentTime() - $seconds >= $starting) {
+            if (($now + $this->sleepMilliseconds - $milliseconds) >= $starting) {
                 throw new LockTimeoutException;
             }
+
+            Sleep::usleep($this->sleepMilliseconds * 1000);
         }
 
         if (is_callable($callback)) {
-            return tap($callback(), function () {
+            try {
+                return $callback();
+            } finally {
                 $this->release();
-            });
+            }
         }
 
         return true;
+    }
+
+    /**
+     * Returns the current owner of the lock.
+     *
+     * @return string
+     */
+    public function owner()
+    {
+        return $this->owner;
+    }
+
+    /**
+     * Determines whether this lock is allowed to release the lock in the driver.
+     *
+     * @return bool
+     */
+    public function isOwnedByCurrentProcess()
+    {
+        return $this->isOwnedBy($this->owner);
+    }
+
+    /**
+     * Determine whether this lock is owned by the given identifier.
+     *
+     * @param  string|null  $owner
+     * @return bool
+     */
+    public function isOwnedBy($owner)
+    {
+        return $this->getCurrentOwner() === $owner;
+    }
+
+    /**
+     * Specify the number of milliseconds to sleep in between blocked lock acquisition attempts.
+     *
+     * @param  int  $milliseconds
+     * @return $this
+     */
+    public function betweenBlockedAttemptsSleepFor($milliseconds)
+    {
+        $this->sleepMilliseconds = $milliseconds;
+
+        return $this;
     }
 }

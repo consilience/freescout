@@ -47,7 +47,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function setFormatter(OutputFormatterInterface $formatter)
+    public function setFormatter(OutputFormatterInterface $formatter): void
     {
         $this->formatter = $formatter;
     }
@@ -55,7 +55,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function getFormatter()
+    public function getFormatter(): OutputFormatterInterface
     {
         return $this->formatter;
     }
@@ -63,7 +63,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function setDecorated($decorated)
+    public function setDecorated(bool $decorated): void
     {
         $this->formatter->setDecorated($decorated);
     }
@@ -71,7 +71,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function isDecorated()
+    public function isDecorated(): bool
     {
         return $this->formatter->isDecorated();
     }
@@ -79,7 +79,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function setVerbosity($level)
+    public function setVerbosity(int $level): void
     {
         $this->verbosity = (int) $level;
     }
@@ -87,7 +87,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function getVerbosity()
+    public function getVerbosity(): int
     {
         return $this->verbosity;
     }
@@ -95,7 +95,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function isQuiet()
+    public function isQuiet(): bool
     {
         return self::VERBOSITY_QUIET === $this->verbosity;
     }
@@ -103,7 +103,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function isVerbose()
+    public function isVerbose(): bool
     {
         return self::VERBOSITY_VERBOSE <= $this->verbosity;
     }
@@ -111,7 +111,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function isVeryVerbose()
+    public function isVeryVerbose(): bool
     {
         return self::VERBOSITY_VERY_VERBOSE <= $this->verbosity;
     }
@@ -119,7 +119,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function isDebug()
+    public function isDebug(): bool
     {
         return self::VERBOSITY_DEBUG <= $this->verbosity;
     }
@@ -127,7 +127,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function writeln($messages, $options = self::OUTPUT_NORMAL)
+    public function writeln(\Traversable|array|string $messages, int $options = 0): void
     {
         $this->write($messages, true, $options);
     }
@@ -135,7 +135,7 @@ abstract class Output implements OutputInterface
     /**
      * {@inheritdoc}
      */
-    public function write($messages, $newline = false, $options = self::OUTPUT_NORMAL)
+    public function write(\Traversable|array|string $messages, bool $newline = false, int $options = 0): void
     {
         $messages = (array) $messages;
 

@@ -2,16 +2,28 @@
 
 namespace Illuminate\Mail;
 
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Mail\Mailable as MailableContract;
+use Illuminate\Contracts\Mail\Mailer as MailerContract;
+use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Support\Traits\Conditionable;
 
 class PendingMail
 {
+    use Conditionable;
+
     /**
      * The mailer instance.
      *
-     * @var \Illuminate\Mail\Mailer
+     * @var \Illuminate\Contracts\Mail\Mailer
      */
     protected $mailer;
+
+    /**
+     * The locale of the message.
+     *
+     * @var string
+     */
+    protected $locale;
 
     /**
      * The "to" recipients of the message.
@@ -37,12 +49,24 @@ class PendingMail
     /**
      * Create a new mailable mailer instance.
      *
-     * @param  \Illuminate\Mail\Mailer  $mailer
-     * @return void
+     * @param  \Illuminate\Contracts\Mail\Mailer  $mailer
      */
-    public function __construct(Mailer $mailer)
+    public function __construct(MailerContract $mailer)
     {
         $this->mailer = $mailer;
+    }
+
+    /**
+     * Set the locale of the message.
+     *
+     * @param  string  $locale
+     * @return $this
+     */
+    public function locale($locale)
+    {
+        $this->locale = $locale;
+
+        return $this;
     }
 
     /**
@@ -54,6 +78,10 @@ class PendingMail
     public function to($users)
     {
         $this->to = $users;
+
+        if (! $this->locale && $users instanceof HasLocalePreference) {
+            $this->locale($users->preferredLocale());
+        }
 
         return $this;
     }
@@ -87,54 +115,44 @@ class PendingMail
     /**
      * Send a new mailable message instance.
      *
-     * @param  \Illuminate\Mail\Mailable  $mailable
-     * @return mixed
+     * @param  \Illuminate\Contracts\Mail\Mailable  $mailable
+     * @return \Illuminate\Mail\SentMessage|null
      */
-    public function send(Mailable $mailable)
+    public function send(MailableContract $mailable)
     {
-        if ($mailable instanceof ShouldQueue) {
-            return $this->queue($mailable);
-        }
-
         return $this->mailer->send($this->fill($mailable));
     }
 
     /**
-     * Send a mailable message immediately.
+     * Send a new mailable message instance synchronously.
      *
-     * @param  \Illuminate\Mail\Mailable  $mailable
-     * @return mixed
+     * @param  \Illuminate\Contracts\Mail\Mailable  $mailable
+     * @return \Illuminate\Mail\SentMessage|null
      */
-    public function sendNow(Mailable $mailable)
+    public function sendNow(MailableContract $mailable)
     {
-        return $this->mailer->send($this->fill($mailable));
+        return $this->mailer->sendNow($this->fill($mailable));
     }
 
     /**
      * Push the given mailable onto the queue.
      *
-     * @param  \Illuminate\Mail\Mailable  $mailable
+     * @param  \Illuminate\Contracts\Mail\Mailable  $mailable
      * @return mixed
      */
-    public function queue(Mailable $mailable)
+    public function queue(MailableContract $mailable)
     {
-        $mailable = $this->fill($mailable);
-
-        if (isset($mailable->delay)) {
-            return $this->mailer->later($mailable->delay, $mailable);
-        }
-
-        return $this->mailer->queue($mailable);
+        return $this->mailer->queue($this->fill($mailable));
     }
 
     /**
-     * Deliver the queued message after the given delay.
+     * Deliver the queued message after (n) seconds.
      *
      * @param  \DateTimeInterface|\DateInterval|int  $delay
-     * @param  \Illuminate\Mail\Mailable  $mailable
+     * @param  \Illuminate\Contracts\Mail\Mailable  $mailable
      * @return mixed
      */
-    public function later($delay, Mailable $mailable)
+    public function later($delay, MailableContract $mailable)
     {
         return $this->mailer->later($delay, $this->fill($mailable));
     }
@@ -142,13 +160,17 @@ class PendingMail
     /**
      * Populate the mailable with the addresses.
      *
-     * @param  \Illuminate\Mail\Mailable  $mailable
+     * @param  \Illuminate\Contracts\Mail\Mailable  $mailable
      * @return \Illuminate\Mail\Mailable
      */
-    protected function fill(Mailable $mailable)
+    protected function fill(MailableContract $mailable)
     {
-        return $mailable->to($this->to)
-                        ->cc($this->cc)
-                        ->bcc($this->bcc);
+        return tap($mailable->to($this->to)
+            ->cc($this->cc)
+            ->bcc($this->bcc), function (MailableContract $mailable) {
+                if ($this->locale) {
+                    $mailable->locale($this->locale);
+                }
+            });
     }
 }

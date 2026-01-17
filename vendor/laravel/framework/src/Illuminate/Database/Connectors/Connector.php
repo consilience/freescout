@@ -2,10 +2,10 @@
 
 namespace Illuminate\Database\Connectors;
 
-use PDO;
 use Exception;
-use Doctrine\DBAL\Driver\PDOConnection;
 use Illuminate\Database\DetectsLostConnections;
+use PDO;
+use Throwable;
 
 class Connector
 {
@@ -28,13 +28,15 @@ class Connector
      * Create a new PDO connection.
      *
      * @param  string  $dsn
-     * @param  array   $config
-     * @param  array   $options
+     * @param  array  $config
+     * @param  array  $options
      * @return \PDO
+     *
+     * @throws \Exception
      */
     public function createConnection($dsn, array $config, array $options)
     {
-        list($username, $password) = [
+        [$username, $password] = [
             $config['username'] ?? null, $config['password'] ?? null,
         ];
 
@@ -58,40 +60,26 @@ class Connector
      * @param  array  $options
      * @return \PDO
      */
-    protected function createPdoConnection($dsn, $username, $password, $options)
+    protected function createPdoConnection($dsn, $username, #[\SensitiveParameter] $password, $options)
     {
-        if (class_exists(PDOConnection::class) && ! $this->isPersistentConnection($options)) {
-            return new PDOConnection($dsn, $username, $password, $options);
-        }
-
-        return new PDO($dsn, $username, $password, $options);
-    }
-
-    /**
-     * Determine if the connection is persistent.
-     *
-     * @param  array  $options
-     * @return bool
-     */
-    protected function isPersistentConnection($options)
-    {
-        return isset($options[PDO::ATTR_PERSISTENT]) &&
-               $options[PDO::ATTR_PERSISTENT];
+        return version_compare(PHP_VERSION, '8.4.0', '<')
+            ? new PDO($dsn, $username, $password, $options)
+            : PDO::connect($dsn, $username, $password, $options); /** @phpstan-ignore staticMethod.notFound (PHP 8.4) */
     }
 
     /**
      * Handle an exception that occurred during connect execution.
      *
-     * @param  \Exception  $e
+     * @param  \Throwable  $e
      * @param  string  $dsn
      * @param  string  $username
      * @param  string  $password
-     * @param  array   $options
+     * @param  array  $options
      * @return \PDO
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
-    protected function tryAgainIfCausedByLostConnection(Exception $e, $dsn, $username, $password, $options)
+    protected function tryAgainIfCausedByLostConnection(Throwable $e, $dsn, $username, #[\SensitiveParameter] $password, $options)
     {
         if ($this->causedByLostConnection($e)) {
             return $this->createPdoConnection($dsn, $username, $password, $options);

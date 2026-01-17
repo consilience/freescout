@@ -2460,6 +2460,22 @@ class Builder
     }
 
     /**
+     * Register a callback to be called when the model is booted (Laravel 12).
+     * This is a pass-through method for compatibility.
+     *
+     * @param  callable  $callback
+     * @return $this
+     */
+    public function whenBooted(callable $callback)
+    {
+        // For Query Builder, we just execute the callback immediately
+        // since queries don't have a boot lifecycle like models do
+        $callback($this);
+
+        return $this;
+    }
+
+    /**
      * Handle dynamic method calls into the method.
      *
      * @param  string  $method

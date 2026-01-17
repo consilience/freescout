@@ -17,7 +17,6 @@ class RouteParameterBinder
      * Create a new Route parameter binder instance.
      *
      * @param  \Illuminate\Routing\Route  $route
-     * @return void
      */
     public function __construct($route)
     {
@@ -32,9 +31,6 @@ class RouteParameterBinder
      */
     public function parameters($request)
     {
-        // If the route has a regular expression for the host part of the URI, we will
-        // compile that and get the parameter matches for this domain. We will then
-        // merge them into this parameters array so that this array is completed.
         $parameters = $this->bindPathParameters($request);
 
         // If the route has a regular expression for the host part of the URI, we will

@@ -1,10 +1,11 @@
 <?php
 
-namespace DummyNamespace;
+namespace {{ namespace }};
 
+{{ factoryImport }}
 use Illuminate\Database\Eloquent\Model;
 
-class DummyClass extends Model
+class {{ class }} extends Model
 {
-    //
+    {{ factory }}
 }

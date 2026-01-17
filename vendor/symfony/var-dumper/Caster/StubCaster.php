@@ -17,10 +17,14 @@ use Symfony\Component\VarDumper\Cloner\Stub;
  * Casts a caster's Stub.
  *
  * @author Nicolas Grekas <p@tchwork.com>
+ *
+ * @final
+ *
+ * @internal since Symfony 7.3
  */
 class StubCaster
 {
-    public static function castStub(Stub $c, array $a, Stub $stub, $isNested)
+    public static function castStub(Stub $c, array $a, Stub $stub, bool $isNested): array
     {
         if ($isNested) {
             $stub->type = $c->type;
@@ -35,29 +39,29 @@ class StubCaster
                 $stub->class = Stub::STRING_BINARY;
             }
 
-            $a = array();
+            $a = [];
         }
 
         return $a;
     }
 
-    public static function castCutArray(CutArrayStub $c, array $a, Stub $stub, $isNested)
+    public static function castCutArray(CutArrayStub $c, array $a, Stub $stub, bool $isNested): array
     {
         return $isNested ? $c->preservedSubset : $a;
     }
 
-    public static function cutInternals($obj, array $a, Stub $stub, $isNested)
+    public static function cutInternals($obj, array $a, Stub $stub, bool $isNested): array
     {
         if ($isNested) {
             $stub->cut += \count($a);
 
-            return array();
+            return [];
         }
 
         return $a;
     }
 
-    public static function castEnum(EnumStub $c, array $a, Stub $stub, $isNested)
+    public static function castEnum(EnumStub $c, array $a, Stub $stub, bool $isNested): array
     {
         if ($isNested) {
             $stub->class = $c->dumpKeys ? '' : null;
@@ -66,7 +70,7 @@ class StubCaster
             $stub->cut = $c->cut;
             $stub->attr = $c->attr;
 
-            $a = array();
+            $a = [];
 
             if ($c->value) {
                 foreach (array_keys($c->value) as $k) {
@@ -76,6 +80,14 @@ class StubCaster
                 $a = array_combine($keys, $c->value);
             }
         }
+
+        return $a;
+    }
+
+    public static function castScalar(ScalarStub $scalarStub, array $a, Stub $stub): array
+    {
+        $stub->type = Stub::TYPE_SCALAR;
+        $stub->attr['value'] = $scalarStub->value;
 
         return $a;
     }

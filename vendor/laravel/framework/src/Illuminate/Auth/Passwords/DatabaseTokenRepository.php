@@ -2,67 +2,28 @@
 
 namespace Illuminate\Auth\Passwords;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Contracts\Hashing\Hasher as HasherContract;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class DatabaseTokenRepository implements TokenRepositoryInterface
 {
     /**
-     * The database connection instance.
-     *
-     * @var \Illuminate\Database\ConnectionInterface
-     */
-    protected $connection;
-
-    /**
-     * The Hasher implementation.
-     *
-     * @var \Illuminate\Contracts\Hashing\Hasher
-     */
-    protected $hasher;
-
-    /**
-     * The token database table.
-     *
-     * @var string
-     */
-    protected $table;
-
-    /**
-     * The hashing key.
-     *
-     * @var string
-     */
-    protected $hashKey;
-
-    /**
-     * The number of seconds a token should last.
-     *
-     * @var int
-     */
-    protected $expires;
-
-    /**
      * Create a new token repository instance.
      *
-     * @param  \Illuminate\Database\ConnectionInterface  $connection
-     * @param  \Illuminate\Contracts\Hashing\Hasher  $hasher
-     * @param  string  $table
-     * @param  string  $hashKey
-     * @param  int  $expires
-     * @return void
+     * @param  int  $expires  The number of seconds a token should remain valid.
+     * @param  int  $throttle  Minimum number of seconds before the user can generate new password reset tokens.
      */
-    public function __construct(ConnectionInterface $connection, HasherContract $hasher,
-                                $table, $hashKey, $expires = 60)
-    {
-        $this->table = $table;
-        $this->hasher = $hasher;
-        $this->hashKey = $hashKey;
-        $this->expires = $expires * 60;
-        $this->connection = $connection;
+    public function __construct(
+        protected ConnectionInterface $connection,
+        protected HasherContract $hasher,
+        protected string $table,
+        protected string $hashKey,
+        protected int $expires = 3600,
+        protected int $throttle = 60,
+    ) {
     }
 
     /**
@@ -105,7 +66,7 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
      * @param  string  $token
      * @return array
      */
-    protected function getPayload($email, $token)
+    protected function getPayload($email, #[\SensitiveParameter] $token)
     {
         return ['email' => $email, 'token' => $this->hasher->make($token), 'created_at' => new Carbon];
     }
@@ -117,7 +78,7 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
      * @param  string  $token
      * @return bool
      */
-    public function exists(CanResetPasswordContract $user, $token)
+    public function exists(CanResetPasswordContract $user, #[\SensitiveParameter] $token)
     {
         $record = (array) $this->getTable()->where(
             'email', $user->getEmailForPasswordReset()
@@ -137,6 +98,38 @@ class DatabaseTokenRepository implements TokenRepositoryInterface
     protected function tokenExpired($createdAt)
     {
         return Carbon::parse($createdAt)->addSeconds($this->expires)->isPast();
+    }
+
+    /**
+     * Determine if the given user recently created a password reset token.
+     *
+     * @param  \Illuminate\Contracts\Auth\CanResetPassword  $user
+     * @return bool
+     */
+    public function recentlyCreatedToken(CanResetPasswordContract $user)
+    {
+        $record = (array) $this->getTable()->where(
+            'email', $user->getEmailForPasswordReset()
+        )->first();
+
+        return $record && $this->tokenRecentlyCreated($record['created_at']);
+    }
+
+    /**
+     * Determine if the token was recently created.
+     *
+     * @param  string  $createdAt
+     * @return bool
+     */
+    protected function tokenRecentlyCreated($createdAt)
+    {
+        if ($this->throttle <= 0) {
+            return false;
+        }
+
+        return Carbon::parse($createdAt)->addSeconds(
+            $this->throttle
+        )->isFuture();
     }
 
     /**

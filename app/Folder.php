@@ -6,6 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Folder extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     /**
      * Folders types (ids from HelpScout interface).
      */

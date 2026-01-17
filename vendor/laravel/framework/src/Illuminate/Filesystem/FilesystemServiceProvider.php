@@ -2,10 +2,23 @@
 
 namespace Illuminate\Filesystem;
 
+use Illuminate\Contracts\Foundation\CachesRoutes;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class FilesystemServiceProvider extends ServiceProvider
 {
+    /**
+     * Bootstrap the filesystem.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->serveFiles();
+    }
+
     /**
      * Register the service provider.
      *
@@ -14,7 +27,6 @@ class FilesystemServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerNativeFilesystem();
-
         $this->registerFlysystem();
     }
 
@@ -39,12 +51,12 @@ class FilesystemServiceProvider extends ServiceProvider
     {
         $this->registerManager();
 
-        $this->app->singleton('filesystem.disk', function () {
-            return $this->app['filesystem']->disk($this->getDefaultDriver());
+        $this->app->singleton('filesystem.disk', function ($app) {
+            return $app['filesystem']->disk($this->getDefaultDriver());
         });
 
-        $this->app->singleton('filesystem.cloud', function () {
-            return $this->app['filesystem']->disk($this->getCloudDriver());
+        $this->app->singleton('filesystem.cloud', function ($app) {
+            return $app['filesystem']->disk($this->getCloudDriver());
         });
     }
 
@@ -55,9 +67,54 @@ class FilesystemServiceProvider extends ServiceProvider
      */
     protected function registerManager()
     {
-        $this->app->singleton('filesystem', function () {
-            return new FilesystemManager($this->app);
+        $this->app->singleton('filesystem', function ($app) {
+            return new FilesystemManager($app);
         });
+    }
+
+    /**
+     * Register protected file serving.
+     *
+     * @return void
+     */
+    protected function serveFiles()
+    {
+        if ($this->app instanceof CachesRoutes && $this->app->routesAreCached()) {
+            return;
+        }
+
+        foreach ($this->app['config']['filesystems.disks'] ?? [] as $disk => $config) {
+            if (! $this->shouldServeFiles($config)) {
+                continue;
+            }
+
+            $this->app->booted(function ($app) use ($disk, $config) {
+                $uri = isset($config['url'])
+                    ? rtrim(parse_url($config['url'])['path'], '/')
+                    : '/storage';
+
+                $isProduction = $app->isProduction();
+
+                Route::get($uri.'/{path}', function (Request $request, string $path) use ($disk, $config, $isProduction) {
+                    return (new ServeFile(
+                        $disk,
+                        $config,
+                        $isProduction
+                    ))($request, $path);
+                })->where('path', '.*')->name('storage.'.$disk);
+            });
+        }
+    }
+
+    /**
+     * Determine if the disk is serveable.
+     *
+     * @param  array  $config
+     * @return bool
+     */
+    protected function shouldServeFiles(array $config)
+    {
+        return $config['driver'] === 'local' && ($config['serve'] ?? false);
     }
 
     /**

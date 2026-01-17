@@ -18,34 +18,15 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class TranslatorPass implements CompilerPassInterface
 {
-    private $translatorServiceId;
-    private $readerServiceId;
-    private $loaderTag;
-    private $debugCommandServiceId;
-    private $updateCommandServiceId;
-
-    public function __construct($translatorServiceId = 'translator.default', $readerServiceId = 'translation.loader', $loaderTag = 'translation.loader', $debugCommandServiceId = 'console.command.translation_debug', $updateCommandServiceId = 'console.command.translation_update')
+    public function process(ContainerBuilder $container): void
     {
-        if ('translation.loader' === $readerServiceId && 2 > \func_num_args()) {
-            @trigger_error(sprintf('The default value for $readerServiceId in "%s()" will change in 4.0 to "translation.reader".', __METHOD__), E_USER_DEPRECATED);
-        }
-
-        $this->translatorServiceId = $translatorServiceId;
-        $this->readerServiceId = $readerServiceId;
-        $this->loaderTag = $loaderTag;
-        $this->debugCommandServiceId = $debugCommandServiceId;
-        $this->updateCommandServiceId = $updateCommandServiceId;
-    }
-
-    public function process(ContainerBuilder $container)
-    {
-        if (!$container->hasDefinition($this->translatorServiceId)) {
+        if (!$container->hasDefinition('translator.default')) {
             return;
         }
 
-        $loaders = array();
-        $loaderRefs = array();
-        foreach ($container->findTaggedServiceIds($this->loaderTag, true) as $id => $attributes) {
+        $loaders = [];
+        $loaderRefs = [];
+        foreach ($container->findTaggedServiceIds('translation.loader', true) as $id => $attributes) {
             $loaderRefs[$id] = new Reference($id);
             $loaders[$id][] = $attributes[0]['alias'];
             if (isset($attributes[0]['legacy-alias'])) {
@@ -53,43 +34,58 @@ class TranslatorPass implements CompilerPassInterface
             }
         }
 
-        if ($container->hasDefinition($this->readerServiceId)) {
-            $definition = $container->getDefinition($this->readerServiceId);
+        if ($container->hasDefinition('translation.reader')) {
+            $definition = $container->getDefinition('translation.reader');
             foreach ($loaders as $id => $formats) {
                 foreach ($formats as $format) {
-                    $definition->addMethodCall('addLoader', array($format, $loaderRefs[$id]));
-                }
-            }
-        }
-
-        // Duplicated code to support "translation.reader", to be removed in 4.0
-        if ('translation.reader' !== $this->readerServiceId) {
-            if ($container->hasDefinition('translation.reader')) {
-                $definition = $container->getDefinition('translation.reader');
-                foreach ($loaders as $id => $formats) {
-                    foreach ($formats as $format) {
-                        $definition->addMethodCall('addLoader', array($format, $loaderRefs[$id]));
-                    }
+                    $definition->addMethodCall('addLoader', [$format, $loaderRefs[$id]]);
                 }
             }
         }
 
         $container
-            ->findDefinition($this->translatorServiceId)
+            ->findDefinition('translator.default')
             ->replaceArgument(0, ServiceLocatorTagPass::register($container, $loaderRefs))
             ->replaceArgument(3, $loaders)
         ;
+
+        if ($container->hasDefinition('validator') && $container->hasDefinition('translation.extractor.visitor.constraint')) {
+            $constraintVisitorDefinition = $container->getDefinition('translation.extractor.visitor.constraint');
+            $constraintClassNames = [];
+
+            foreach ($container->getDefinitions() as $definition) {
+                if (!$definition->hasTag('validator.constraint_validator')) {
+                    continue;
+                }
+                // Resolve constraint validator FQCN even if defined as %foo.validator.class% parameter
+                $className = $container->getParameterBag()->resolveValue($definition->getClass());
+                // Extraction of the constraint class name from the Constraint Validator FQCN
+                $constraintClassNames[] = str_replace('Validator', '', substr(strrchr($className, '\\'), 1));
+            }
+
+            $constraintVisitorDefinition->setArgument(0, $constraintClassNames);
+        }
 
         if (!$container->hasParameter('twig.default_path')) {
             return;
         }
 
-        if ($container->hasDefinition($this->debugCommandServiceId)) {
-            $container->getDefinition($this->debugCommandServiceId)->replaceArgument(4, $container->getParameter('twig.default_path'));
-        }
+        $paths = array_keys($container->getDefinition('twig.template_iterator')->getArgument(1));
+        if ($container->hasDefinition('console.command.translation_debug')) {
+            $definition = $container->getDefinition('console.command.translation_debug');
+            $definition->replaceArgument(4, $container->getParameter('twig.default_path'));
 
-        if ($container->hasDefinition($this->updateCommandServiceId)) {
-            $container->getDefinition($this->updateCommandServiceId)->replaceArgument(5, $container->getParameter('twig.default_path'));
+            if (\count($definition->getArguments()) > 6) {
+                $definition->replaceArgument(6, $paths);
+            }
+        }
+        if ($container->hasDefinition('console.command.translation_extract')) {
+            $definition = $container->getDefinition('console.command.translation_extract');
+            $definition->replaceArgument(5, $container->getParameter('twig.default_path'));
+
+            if (\count($definition->getArguments()) > 7) {
+                $definition->replaceArgument(7, $paths);
+            }
         }
     }
 }

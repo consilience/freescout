@@ -21,7 +21,7 @@ return [
 
     /*
      * You can specify an auth driver here that gets user models.
-     * If this is null we'll use the default Laravel auth driver.
+     * If this is null we'll use the current Laravel auth driver.
      */
     'default_auth_driver' => null,
 
@@ -31,8 +31,9 @@ return [
     'subject_returns_soft_deleted_models' => false,
 
     /*
-     * This model will be used to log activity. The only requirement is that
-     * it should be or extend the Spatie\Activitylog\Models\Activity model.
+     * This model will be used to log activity.
+     * It should implement the Spatie\Activitylog\Contracts\Activity interface
+     * and extend Illuminate\Database\Eloquent\Model.
      */
     'activity_model' => \Spatie\Activitylog\Models\Activity::class,
 
@@ -40,5 +41,12 @@ return [
      * This is the name of the table that will be created by the migration and
      * used by the Activity model shipped with this package.
      */
-    'table_name' => 'activity_log',
+    'table_name' => env('ACTIVITY_LOGGER_TABLE_NAME', 'activity_log'),
+
+    /*
+     * This is the database connection that will be used by the migration and
+     * the Activity model shipped with this package. In case it's not set
+     * Laravel's database.default will be used instead.
+     */
+    'database_connection' => env('ACTIVITY_LOGGER_DB_CONNECTION'),
 ];

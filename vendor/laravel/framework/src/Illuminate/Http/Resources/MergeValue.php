@@ -3,6 +3,7 @@
 namespace Illuminate\Http\Resources;
 
 use Illuminate\Support\Collection;
+use JsonSerializable;
 
 class MergeValue
 {
@@ -14,13 +15,18 @@ class MergeValue
     public $data;
 
     /**
-     * Create new merge value instance.
+     * Create a new merge value instance.
      *
-     * @param  \Illuminate\Support\Collection|array  $data
-     * @return void
+     * @param  \Illuminate\Support\Collection|\JsonSerializable|array  $data
      */
     public function __construct($data)
     {
-        $this->data = $data instanceof Collection ? $data->all() : $data;
+        if ($data instanceof Collection) {
+            $this->data = $data->all();
+        } elseif ($data instanceof JsonSerializable) {
+            $this->data = $data->jsonSerialize();
+        } else {
+            $this->data = $data;
+        }
     }
 }

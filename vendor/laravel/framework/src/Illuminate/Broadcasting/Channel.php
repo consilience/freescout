@@ -2,7 +2,10 @@
 
 namespace Illuminate\Broadcasting;
 
-class Channel
+use Illuminate\Contracts\Broadcasting\HasBroadcastChannel;
+use Stringable;
+
+class Channel implements Stringable
 {
     /**
      * The channel's name.
@@ -14,12 +17,11 @@ class Channel
     /**
      * Create a new channel instance.
      *
-     * @param  string  $name
-     * @return void
+     * @param  \Illuminate\Contracts\Broadcasting\HasBroadcastChannel|string  $name
      */
     public function __construct($name)
     {
-        $this->name = $name;
+        $this->name = $name instanceof HasBroadcastChannel ? $name->broadcastChannel() : $name;
     }
 
     /**

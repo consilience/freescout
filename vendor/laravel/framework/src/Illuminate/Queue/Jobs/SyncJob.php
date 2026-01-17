@@ -28,7 +28,6 @@ class SyncJob extends Job implements JobContract
      * @param  string  $payload
      * @param  string  $connectionName
      * @param  string  $queue
-     * @return void
      */
     public function __construct(Container $container, $payload, $connectionName, $queue)
     {
@@ -39,9 +38,9 @@ class SyncJob extends Job implements JobContract
     }
 
     /**
-     * Release the job back into the queue.
+     * Release the job back into the queue after (n) seconds.
      *
-     * @param  int   $delay
+     * @param  int  $delay
      * @return void
      */
     public function release($delay = 0)

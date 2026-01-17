@@ -17,8 +17,8 @@ abstract class TestCase extends BaseTestCase
         Concerns\InteractsWithConsole,
         Concerns\InteractsWithDatabase,
         Concerns\InteractsWithExceptionHandling,
-        Concerns\InteractsWithSession,
-        Concerns\MocksApplicationServices;
+        Concerns\InteractsWithSession;
+        // MocksApplicationServices removed in Laravel 12
 
     /**
      * The Illuminate application instance.

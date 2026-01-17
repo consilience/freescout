@@ -3,6 +3,13 @@
 namespace Illuminate\Database\Eloquent\Concerns;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Events\NullDispatcher;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
+use ReflectionClass;
 
 trait HasEvents
 {
@@ -25,25 +32,95 @@ trait HasEvents
     protected $observables = [];
 
     /**
-     * Register an observer with the Model.
+     * Boot the has event trait for a model.
      *
-     * @param  object|string  $class
      * @return void
      */
-    public static function observe($class)
+    public static function bootHasEvents()
+    {
+        static::whenBooted(fn () => static::observe(static::resolveObserveAttributes()));
+    }
+
+    /**
+     * Resolve the observe class names from the attributes.
+     *
+     * @return array
+     */
+    public static function resolveObserveAttributes()
+    {
+        $reflectionClass = new ReflectionClass(static::class);
+
+        $isEloquentGrandchild = is_subclass_of(static::class, Model::class)
+            && get_parent_class(static::class) !== Model::class;
+
+        return (new Collection($reflectionClass->getAttributes(ObservedBy::class)))
+            ->map(fn ($attribute) => $attribute->getArguments())
+            ->flatten()
+            ->when($isEloquentGrandchild, function (Collection $attributes) {
+                return (new Collection(get_parent_class(static::class)::resolveObserveAttributes()))
+                    ->merge($attributes);
+            })
+            ->all();
+    }
+
+    /**
+     * Register observers with the model.
+     *
+     * @param  object|array|string  $classes
+     * @return void
+     *
+     * @throws \RuntimeException
+     */
+    public static function observe($classes)
     {
         $instance = new static;
 
-        $className = is_string($class) ? $class : get_class($class);
+        foreach (Arr::wrap($classes) as $class) {
+            $instance->registerObserver($class);
+        }
+    }
+
+    /**
+     * Register a single observer with the model.
+     *
+     * @param  object|string  $class
+     * @return void
+     *
+     * @throws \RuntimeException
+     */
+    protected function registerObserver($class)
+    {
+        $className = $this->resolveObserverClassName($class);
 
         // When registering a model observer, we will spin through the possible events
         // and determine if this observer has that method. If it does, we will hook
         // it into the model's event system, making it convenient to watch these.
-        foreach ($instance->getObservableEvents() as $event) {
+        foreach ($this->getObservableEvents() as $event) {
             if (method_exists($class, $event)) {
                 static::registerModelEvent($event, $className.'@'.$event);
             }
         }
+    }
+
+    /**
+     * Resolve the observer's class name from an object or string.
+     *
+     * @param  object|string  $class
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    private function resolveObserverClassName($class)
+    {
+        if (is_object($class)) {
+            return get_class($class);
+        }
+
+        if (class_exists($class)) {
+            return $class;
+        }
+
+        throw new InvalidArgumentException('Unable to find observer: '.$class);
     }
 
     /**
@@ -55,9 +132,9 @@ trait HasEvents
     {
         return array_merge(
             [
-                'retrieved', 'creating', 'created', 'updating',
-                'updated', 'deleting', 'deleted', 'saving',
-                'saved', 'restoring', 'restored',
+                'retrieved', 'creating', 'created', 'updating', 'updated',
+                'saving', 'saved', 'restoring', 'restored', 'replicating',
+                'trashed', 'deleting', 'deleted', 'forceDeleting', 'forceDeleted',
             ],
             $this->observables
         );
@@ -79,7 +156,7 @@ trait HasEvents
     /**
      * Add an observable event name.
      *
-     * @param  array|mixed  $observables
+     * @param  mixed  $observables
      * @return void
      */
     public function addObservableEvents($observables)
@@ -92,7 +169,7 @@ trait HasEvents
     /**
      * Remove an observable event name.
      *
-     * @param  array|mixed  $observables
+     * @param  mixed  $observables
      * @return void
      */
     public function removeObservableEvents($observables)
@@ -106,7 +183,7 @@ trait HasEvents
      * Register a model event with the dispatcher.
      *
      * @param  string  $event
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     protected static function registerModelEvent($event, $callback)
@@ -134,7 +211,7 @@ trait HasEvents
         // First, we will get the proper method to call on the event dispatcher, and then we
         // will attempt to fire a custom, object based event for the given event. If that
         // returns a result we can return that result, or we'll call the string events.
-        $method = $halt ? 'until' : 'fire';
+        $method = $halt ? 'until' : 'dispatch';
 
         $result = $this->filterModelEventResults(
             $this->fireCustomModelEvent($event, $method)
@@ -154,7 +231,7 @@ trait HasEvents
      *
      * @param  string  $event
      * @param  string  $method
-     * @return mixed|null
+     * @return mixed
      */
     protected function fireCustomModelEvent($event, $method)
     {
@@ -189,7 +266,7 @@ trait HasEvents
     /**
      * Register a retrieved model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function retrieved($callback)
@@ -200,7 +277,7 @@ trait HasEvents
     /**
      * Register a saving model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function saving($callback)
@@ -211,7 +288,7 @@ trait HasEvents
     /**
      * Register a saved model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function saved($callback)
@@ -222,7 +299,7 @@ trait HasEvents
     /**
      * Register an updating model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function updating($callback)
@@ -233,7 +310,7 @@ trait HasEvents
     /**
      * Register an updated model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function updated($callback)
@@ -244,7 +321,7 @@ trait HasEvents
     /**
      * Register a creating model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function creating($callback)
@@ -255,7 +332,7 @@ trait HasEvents
     /**
      * Register a created model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function created($callback)
@@ -264,9 +341,20 @@ trait HasEvents
     }
 
     /**
+     * Register a replicating model event with the dispatcher.
+     *
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
+     * @return void
+     */
+    public static function replicating($callback)
+    {
+        static::registerModelEvent('replicating', $callback);
+    }
+
+    /**
      * Register a deleting model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function deleting($callback)
@@ -277,7 +365,7 @@ trait HasEvents
     /**
      * Register a deleted model event with the dispatcher.
      *
-     * @param  \Closure|string  $callback
+     * @param  \Illuminate\Events\QueuedClosure|callable|array|class-string  $callback
      * @return void
      */
     public static function deleted($callback)
@@ -286,7 +374,7 @@ trait HasEvents
     }
 
     /**
-     * Remove all of the event listeners for the model.
+     * Remove all the event listeners for the model.
      *
      * @return void
      */
@@ -302,15 +390,25 @@ trait HasEvents
             static::$dispatcher->forget("eloquent.{$event}: ".static::class);
         }
 
-        foreach (array_values($instance->dispatchesEvents) as $event) {
+        foreach ($instance->dispatchesEvents as $event) {
             static::$dispatcher->forget($event);
         }
     }
 
     /**
+     * Get the event map for the model.
+     *
+     * @return array
+     */
+    public function dispatchesEvents()
+    {
+        return $this->dispatchesEvents;
+    }
+
+    /**
      * Get the event dispatcher instance.
      *
-     * @return \Illuminate\Contracts\Events\Dispatcher
+     * @return \Illuminate\Contracts\Events\Dispatcher|null
      */
     public static function getEventDispatcher()
     {
@@ -336,5 +434,28 @@ trait HasEvents
     public static function unsetEventDispatcher()
     {
         static::$dispatcher = null;
+    }
+
+    /**
+     * Execute a callback without firing any model events for any model type.
+     *
+     * @param  callable  $callback
+     * @return mixed
+     */
+    public static function withoutEvents(callable $callback)
+    {
+        $dispatcher = static::getEventDispatcher();
+
+        if ($dispatcher) {
+            static::setEventDispatcher(new NullDispatcher($dispatcher));
+        }
+
+        try {
+            return $callback();
+        } finally {
+            if ($dispatcher) {
+                static::setEventDispatcher($dispatcher);
+            }
+        }
     }
 }

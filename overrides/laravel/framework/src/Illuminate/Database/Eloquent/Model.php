@@ -1327,11 +1327,47 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      * Retrieve the model for a bound value.
      *
      * @param  mixed  $value
+     * @param  string|null  $field
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function resolveRouteBinding($value)
+    public function resolveRouteBinding($value, $field = null)
     {
-        return $this->where($this->getRouteKeyName(), $value)->first();
+        return $this->where($field ?? $this->getRouteKeyName(), $value)->first();
+    }
+
+    /**
+     * Retrieve the child model for a bound value.
+     *
+     * @param  string  $childType
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveChildRouteBinding($childType, $value, $field)
+    {
+        return $this->resolveChildRouteBindingQuery($childType, $value, $field)->first();
+    }
+
+    /**
+     * Retrieve the child model query for a bound value.
+     *
+     * @param  string  $childType
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    protected function resolveChildRouteBindingQuery($childType, $value, $field)
+    {
+        $relationship = $this->{$childType}();
+
+        $field = $field ?: $relationship->getRelated()->getRouteKeyName();
+
+        if ($relationship instanceof \Illuminate\Database\Eloquent\Relations\HasManyThrough ||
+            $relationship instanceof \Illuminate\Database\Eloquent\Relations\BelongsToMany) {
+            return $relationship->where($relationship->getRelated()->getTable().'.'.$field, $value);
+        }
+
+        return $relationship->where($field, $value);
     }
 
     /**

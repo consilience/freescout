@@ -7,6 +7,16 @@ use Illuminate\Support\Facades\Storage;
 
 class Attachment extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     const TYPE_TEXT = 0;
     const TYPE_MULTIPART = 1;
     const TYPE_MESSAGE = 2;

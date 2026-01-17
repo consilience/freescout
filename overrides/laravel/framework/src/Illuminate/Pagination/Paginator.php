@@ -84,6 +84,20 @@ class Paginator extends AbstractPaginator implements Arrayable, ArrayAccess, Cou
     }
 
     /**
+     * Add all current query string values to the paginator (Laravel 12).
+     *
+     * @return $this
+     */
+    public function withQueryString()
+    {
+        if (! is_null($query = static::resolveQueryString())) {
+            return $this->appends($query);
+        }
+
+        return $this;
+    }
+
+    /**
      * Render the paginator using the given view.
      *
      * @param  string|null  $view

@@ -15,6 +15,16 @@ class Customer extends Model
     // This is obligatory.
     public $rememberCacheDriver = 'array';
 
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
+
     const PHOTO_DIRECTORY = 'customers';
     const PHOTO_QUALITY = 77;
 

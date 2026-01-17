@@ -138,9 +138,10 @@ class Application
             }
         }
 
-        if (null !== $this->dispatcher && $this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
-            @trigger_error(sprintf('The "ConsoleEvents::EXCEPTION" event is deprecated since Symfony 3.3 and will be removed in 4.0. Listen to the "ConsoleEvents::ERROR" event instead.'), \E_USER_DEPRECATED);
-        }
+        // Symfony 7: ConsoleEvents::EXCEPTION was removed - this check is no longer needed
+        // if (null !== $this->dispatcher && $this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
+        //     @trigger_error(sprintf('The "ConsoleEvents::EXCEPTION" event is deprecated since Symfony 3.3 and will be removed in 4.0. Listen to the "ConsoleEvents::ERROR" event instead.'), \E_USER_DEPRECATED);
+        // }
 
         $this->configureIO($input, $output);
 
@@ -240,7 +241,7 @@ class Application
         if (null !== $e) {
             if (null !== $this->dispatcher) {
                 $event = new ConsoleErrorEvent($input, $output, $e);
-                $this->dispatcher->dispatch(ConsoleEvents::ERROR, $event);
+                $this->dispatcher->dispatch($event, ConsoleEvents::ERROR);
                 $e = $event->getError();
 
                 if (0 === $event->getExitCode()) {
@@ -759,18 +760,99 @@ class Application
     }
 
     /**
-     * Renders a caught exception.
+     * Renders a caught throwable.
      */
-    public function renderException(\Exception $e, OutputInterface $output)
+    public function renderThrowable(\Throwable $e, OutputInterface $output)
     {
         $output->writeln('', OutputInterface::VERBOSITY_QUIET);
 
-        $this->doRenderException($e, $output);
+        $this->doRenderThrowable($e, $output);
 
         if (null !== $this->runningCommand) {
             $output->writeln(sprintf('<info>%s</info>', sprintf($this->runningCommand->getSynopsis(), $this->getName())), OutputInterface::VERBOSITY_QUIET);
             $output->writeln('', OutputInterface::VERBOSITY_QUIET);
         }
+    }
+
+    /**
+     * Renders a caught exception.
+     */
+    public function renderException(\Exception $e, OutputInterface $output)
+    {
+        $this->renderThrowable($e, $output);
+    }
+
+    protected function doRenderThrowable(\Throwable $e, OutputInterface $output)
+    {
+        do {
+            $message = trim($e->getMessage());
+            if ('' === $message || OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
+                $title = sprintf('  [%s%s]  ', \get_class($e), 0 !== ($code = $e->getCode()) ? ' ('.$code.')' : '');
+                $len = Helper::strlen($title);
+            } else {
+                $len = 0;
+            }
+
+            $width = $this->terminal->getWidth() ? $this->terminal->getWidth() - 1 : \PHP_INT_MAX;
+            // HHVM only accepts 32 bits integer in str_split, even when PHP_INT_MAX is a 64 bit integer: https://github.com/facebook/hhvm/issues/1327
+            if (\defined('HHVM_VERSION') && $width > 1 << 31) {
+                $width = 1 << 31;
+            }
+            $lines = [];
+
+            foreach ('' !== $message ? preg_split('/\r?\n/', $message) : [] as $line) {
+                foreach (str_split($line, $width - 4) as $chunk) {
+                    // pre-format lines to get the right string length
+                    $lineLength = Helper::strlen($chunk) + 4;
+                    $lines[] = [$chunk, $lineLength];
+
+                    $len = max($lineLength, $len);
+                }
+            }
+
+            $messages = [];
+            if (!$e instanceof \Exception && !$e instanceof \Throwable) {
+                $messages[] = '<comment>Legacy exception</comment>';
+            }
+            $messages[] = '';
+            $messages[] = $emptyLine = sprintf('<error>%s</error>', str_repeat(' ', $len));
+            if ('' === $message || OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
+                $messages[] = sprintf('<error>%s%s</error>', $title, str_repeat(' ', max(0, $len - Helper::strlen($title))));
+            }
+            foreach ($lines as $line) {
+                $messages[] = sprintf('<error>  %s  %s</error>', OutputFormatter::escape($line[0]), str_repeat(' ', $len - $line[1]));
+            }
+            $messages[] = $emptyLine;
+            $messages[] = '';
+
+            $output->writeln($messages, OutputInterface::VERBOSITY_QUIET);
+
+            if (OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
+                $output->writeln('<comment>Exception trace:</comment>', OutputInterface::VERBOSITY_QUIET);
+
+                // exception related properties
+                $trace = $e->getTrace();
+
+                array_unshift($trace, [
+                    'function' => '',
+                    'file' => $e->getFile() ?: 'n/a',
+                    'line' => $e->getLine() ?: 'n/a',
+                    'args' => [],
+                ]);
+
+                for ($i = 0, $count = \count($trace); $i < $count; ++$i) {
+                    $class = $trace[$i]['class'] ?? '';
+                    $type = $trace[$i]['type'] ?? '';
+                    $function = $trace[$i]['function'] ?? '';
+                    $file = $trace[$i]['file'] ?? 'n/a';
+                    $line = $trace[$i]['line'] ?? 'n/a';
+
+                    $output->writeln(sprintf(' %s%s%s() at <info>%s:%s</info>', $class, $type, $function, $file, $line), OutputInterface::VERBOSITY_QUIET);
+                }
+
+                $output->writeln('', OutputInterface::VERBOSITY_QUIET);
+            }
+        } while ($e = $e->getPrevious());
     }
 
     protected function doRenderException(\Exception $e, OutputInterface $output)
@@ -928,13 +1010,14 @@ class Application
                 $inputStream = $input->getStream();
             }
 
-            // This check ensures that calling QuestionHelper::setInputStream() works
-            // To be removed in 4.0 (in the same time as QuestionHelper::setInputStream)
-            if (!$inputStream && $this->getHelperSet()->has('question')) {
-                $inputStream = $this->getHelperSet()->get('question')->getInputStream(false);
-            }
+            // Symfony 7: QuestionHelper::getInputStream() was removed
+            // This check ensured that calling QuestionHelper::setInputStream() worked
+            // Removed in Symfony 4.0+ (we are now on Symfony 7)
+            // if (!$inputStream && $this->getHelperSet()->has('question')) {
+            //     $inputStream = $this->getHelperSet()->get('question')->getInputStream(false);
+            // }
 
-            if (!@posix_isatty($inputStream) && false === getenv('SHELL_INTERACTIVE')) {
+            if ($inputStream && !@posix_isatty($inputStream) && false === getenv('SHELL_INTERACTIVE')) {
                 $input->setInteractive(false);
             }
         }
@@ -1004,7 +1087,7 @@ class Application
         $e = null;
 
         try {
-            $this->dispatcher->dispatch(ConsoleEvents::COMMAND, $event);
+            $this->dispatcher->dispatch($event, ConsoleEvents::COMMAND);
 
             if ($event->commandShouldRun()) {
                 $exitCode = $command->run($input, $output);
@@ -1015,17 +1098,19 @@ class Application
         } catch (\Throwable $e) {
         }
         if (null !== $e) {
-            if ($this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
-                $x = $e instanceof \Exception ? $e : new FatalThrowableError($e);
-                $event = new ConsoleExceptionEvent($command, $input, $output, $x, $x->getCode());
-                $this->dispatcher->dispatch(ConsoleEvents::EXCEPTION, $event);
-
-                if ($x !== $event->getException()) {
-                    $e = $event->getException();
-                }
-            }
+            // Symfony 7: ConsoleEvents::EXCEPTION was removed in Symfony 4.0
+            // Only ConsoleEvents::ERROR is supported now
+            // if ($this->dispatcher->hasListeners(ConsoleEvents::EXCEPTION)) {
+            //     $x = $e instanceof \Exception ? $e : new FatalThrowableError($e);
+            //     $event = new ConsoleExceptionEvent($command, $input, $output, $x, $x->getCode());
+            //     $this->dispatcher->dispatch(ConsoleEvents::EXCEPTION, $event);
+            //
+            //     if ($x !== $event->getException()) {
+            //         $e = $event->getException();
+            //     }
+            // }
             $event = new ConsoleErrorEvent($input, $output, $e, $command);
-            $this->dispatcher->dispatch(ConsoleEvents::ERROR, $event);
+            $this->dispatcher->dispatch($event, ConsoleEvents::ERROR);
             $e = $event->getError();
 
             if (0 === $exitCode = $event->getExitCode()) {
@@ -1034,7 +1119,7 @@ class Application
         }
 
         $event = new ConsoleTerminateEvent($command, $input, $output, $exitCode);
-        $this->dispatcher->dispatch(ConsoleEvents::TERMINATE, $event);
+        $this->dispatcher->dispatch($event, ConsoleEvents::TERMINATE);
 
         if (null !== $e) {
             throw $e;

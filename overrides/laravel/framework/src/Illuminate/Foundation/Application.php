@@ -14,7 +14,6 @@ use Illuminate\Log\LogServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Events\EventServiceProvider;
 use Illuminate\Routing\RoutingServiceProvider;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
@@ -22,7 +21,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 
-class Application extends Container implements ApplicationContract, HttpKernelInterface
+class Application extends Container implements ApplicationContract
 {
     /**
      * The Laravel framework version.
@@ -135,6 +134,13 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * @var string
      */
     protected $namespace;
+
+    /**
+     * The environment resolver callback (Laravel 12).
+     *
+     * @var callable|null
+     */
+    protected static $environmentResolver;
 
     /**
      * Create a new Illuminate application instance.
@@ -369,31 +375,37 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the language files.
      *
+     * @param  string  $path
      * @return string
      */
-    public function langPath()
+    public function langPath($path = '')
     {
-        return $this->resourcePath().DIRECTORY_SEPARATOR.'lang';
+        $langPath = $this->resourcePath().DIRECTORY_SEPARATOR.'lang';
+        return $path ? $langPath.DIRECTORY_SEPARATOR.$path : $langPath;
     }
 
     /**
      * Get the path to the public / web directory.
      *
+     * @param  string  $path
      * @return string
      */
-    public function publicPath()
+    public function publicPath($path = '')
     {
-        return $this->basePath.DIRECTORY_SEPARATOR.'public';
+        $publicPath = $this->basePath.DIRECTORY_SEPARATOR.'public';
+        return $path ? $publicPath.DIRECTORY_SEPARATOR.$path : $publicPath;
     }
 
     /**
      * Get the path to the storage directory.
      *
+     * @param  string  $path
      * @return string
      */
-    public function storagePath()
+    public function storagePath($path = '')
     {
-        return $this->storagePath ?: $this->basePath.DIRECTORY_SEPARATOR.'storage';
+        $storagePath = $this->storagePath ?: $this->basePath.DIRECTORY_SEPARATOR.'storage';
+        return $path ? $storagePath.DIRECTORY_SEPARATOR.$path : $storagePath;
     }
 
     /**
@@ -481,12 +493,13 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get or check the current application environment.
      *
+     * @param  string|array  ...$environments
      * @return string|bool
      */
-    public function environment()
+    public function environment(...$environments)
     {
-        if (func_num_args() > 0) {
-            $patterns = is_array(func_get_arg(0)) ? func_get_arg(0) : func_get_args();
+        if (count($environments) > 0) {
+            $patterns = is_array($environments[0]) ? $environments[0] : $environments;
 
             foreach ($patterns as $pattern) {
                 if (Str::is($pattern, $this['env'])) {
@@ -525,6 +538,19 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
             : null;
 
         return $this['env'] = (new EnvironmentDetector)->detect($callback, $args);
+    }
+
+    /**
+     * Set the environment resolver callback (Laravel 12).
+     *
+     * @param  callable  $callback
+     * @return $this
+     */
+    public function resolveEnvironmentUsing(callable $callback)
+    {
+        static::$environmentResolver = $callback;
+
+        return $this;
     }
 
     /**
@@ -737,6 +763,25 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     }
 
     /**
+     * Get the given type from the container (PSR-11).
+     *
+     * (Overriding Container::get)
+     *
+     * @param  string  $id
+     * @return mixed
+     */
+    public function get(string $id): mixed
+    {
+        $id = $this->getAlias($id);
+
+        if (isset($this->deferredServices[$id]) && ! isset($this->instances[$id])) {
+            $this->loadDeferredProvider($id);
+        }
+
+        return parent::get($id);
+    }
+
+    /**
      * Determine if the given abstract type has been bound.
      *
      * (Overriding Container::bound)
@@ -926,6 +971,26 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     }
 
     /**
+     * Get the application's maintenance mode manager.
+     *
+     * @return \Illuminate\Contracts\Foundation\MaintenanceMode
+     */
+    public function maintenanceMode()
+    {
+        return $this->make('Illuminate\Contracts\Foundation\MaintenanceMode');
+    }
+
+    /**
+     * Determine if the application is currently in debug mode.
+     *
+     * @return bool
+     */
+    public function hasDebugModeEnabled()
+    {
+        return (bool) $this->make('config')->get('app.debug', false);
+    }
+
+    /**
      * Throw an HttpException with the given data.
      *
      * @param  int     $code
@@ -947,10 +1012,10 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Register a terminating callback with the application.
      *
-     * @param  \Closure  $callback
+     * @param  \Closure|string  $callback
      * @return $this
      */
-    public function terminating(Closure $callback)
+    public function terminating($callback)
     {
         $this->terminatingCallbacks[] = $callback;
 
@@ -1074,6 +1139,16 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     public function getLocale()
     {
         return $this['config']->get('app.locale');
+    }
+
+    /**
+     * Get the current application fallback locale.
+     *
+     * @return string
+     */
+    public function getFallbackLocale()
+    {
+        return $this['config']->get('app.fallback_locale');
     }
 
     /**

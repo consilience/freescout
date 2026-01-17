@@ -90,6 +90,16 @@ class Subscription extends Model
     }
 
     /**
+     * Get the queueable relationships for the model.
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
+
+    /**
      * Add default subscriptions for user.
      *
      * @param int $user_id

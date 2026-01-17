@@ -2,7 +2,7 @@
 
 namespace Illuminate\Translation;
 
-use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 
 class MessageSelector
 {
@@ -26,7 +26,7 @@ class MessageSelector
 
         $pluralIndex = $this->getPluralIndex($locale, $number);
 
-        if (count($segments) == 1 || ! isset($segments[$pluralIndex])) {
+        if (count($segments) === 1 || ! isset($segments[$pluralIndex])) {
             return $segments[0];
         }
 
@@ -60,20 +60,20 @@ class MessageSelector
     {
         preg_match('/^[\{\[]([^\[\]\{\}]*)[\}\]](.*)/s', $part, $matches);
 
-        if (count($matches) != 3) {
-            return;
+        if (count($matches) !== 3) {
+            return null;
         }
 
         $condition = $matches[1];
 
         $value = $matches[2];
 
-        if (Str::contains($condition, ',')) {
-            list($from, $to) = explode(',', $condition, 2);
+        if (str_contains($condition, ',')) {
+            [$from, $to] = explode(',', $condition, 2);
 
-            if ($to == '*' && $number >= $from) {
+            if ($to === '*' && $number >= $from) {
                 return $value;
-            } elseif ($from == '*' && $number <= $to) {
+            } elseif ($from === '*' && $number <= $to) {
                 return $value;
             } elseif ($number >= $from && $number <= $to) {
                 return $value;
@@ -91,16 +91,16 @@ class MessageSelector
      */
     private function stripConditions($segments)
     {
-        return collect($segments)->map(function ($part) {
-            return preg_replace('/^[\{\[]([^\[\]\{\}]*)[\}\]]/', '', $part);
-        })->all();
+        return (new Collection($segments))
+            ->map(fn ($part) => preg_replace('/^[\{\[]([^\[\]\{\}]*)[\}\]]/', '', $part))
+            ->all();
     }
 
     /**
      * Get the index to use for pluralization.
      *
      * The plural rules are derived from code of the Zend Framework (2010-09-25), which
-     * is subject to the new BSD license (http://framework.zend.com/license/new-bsd)
+     * is subject to the new BSD license (https://framework.zend.com/license)
      * Copyright (c) 2005-2010 - Zend Technologies USA Inc. (http://www.zend.com)
      *
      * @param  string  $locale

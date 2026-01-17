@@ -2,15 +2,44 @@
 
 namespace Spatie\Activitylog\Models;
 
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Spatie\Activitylog\Contracts\Activity as ActivityContract;
 
-class Activity extends Model
+/**
+ * Spatie\Activitylog\Models\Activity.
+ *
+ * @property int $id
+ * @property string|null $log_name
+ * @property string $description
+ * @property string|null $subject_type
+ * @property int|null $subject_id
+ * @property string|null $causer_type
+ * @property int|null $causer_id
+ * @property string|null $event
+ * @property string|null $batch_uuid
+ * @property \Illuminate\Support\Collection|null $properties
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $causer
+ * @property-read \Illuminate\Support\Collection $changes
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $subject
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity causedBy(\Illuminate\Database\Eloquent\Model $causer)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity forBatch(string $batchUuid)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity forEvent(string $event)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity forSubject(\Illuminate\Database\Eloquent\Model $subject)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity hasBatch()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity inLog($logNames)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Spatie\Activitylog\Models\Activity query()
+ */
+class Activity extends Model implements ActivityContract
 {
-    protected $table;
-
     public $guarded = [];
 
     protected $casts = [
@@ -19,11 +48,20 @@ class Activity extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->table = config('activitylog.table_name');
+        if (! isset($this->connection)) {
+            $this->setConnection(config('activitylog.database_connection'));
+        }
+
+        if (! isset($this->table)) {
+            $this->setTable(config('activitylog.table_name'));
+        }
 
         parent::__construct($attributes);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function subject(): MorphTo
     {
         if (config('activitylog.subject_returns_soft_deleted_models')) {
@@ -33,21 +71,17 @@ class Activity extends Model
         return $this->morphTo();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function causer(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /**
-     * Get the extra properties with the given name.
-     *
-     * @param string $propertyName
-     *
-     * @return mixed
-     */
-    public function getExtraProperty(string $propertyName)
+    public function getExtraProperty(string $propertyName, mixed $defaultValue = null): mixed
     {
-        return array_get($this->properties->toArray(), $propertyName);
+        return Arr::get($this->properties->toArray(), $propertyName, $defaultValue);
     }
 
     public function changes(): Collection
@@ -56,9 +90,12 @@ class Activity extends Model
             return new Collection();
         }
 
-        return collect(array_filter($this->properties->toArray(), function ($key) {
-            return in_array($key, ['attributes', 'old']);
-        }, ARRAY_FILTER_USE_KEY));
+        return $this->properties->only(['attributes', 'old']);
+    }
+
+    public function getChangesAttribute(): Collection
+    {
+        return $this->changes();
     }
 
     public function scopeInLog(Builder $query, ...$logNames): Builder
@@ -70,14 +107,6 @@ class Activity extends Model
         return $query->whereIn('log_name', $logNames);
     }
 
-    /**
-     * Scope a query to only include activities by a given causer.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \Illuminate\Database\Eloquent\Model $causer
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeCausedBy(Builder $query, Model $causer): Builder
     {
         return $query
@@ -85,18 +114,25 @@ class Activity extends Model
             ->where('causer_id', $causer->getKey());
     }
 
-    /**
-     * Scope a query to only include activities for a given subject.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \Illuminate\Database\Eloquent\Model $subject
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeForSubject(Builder $query, Model $subject): Builder
     {
         return $query
             ->where('subject_type', $subject->getMorphClass())
             ->where('subject_id', $subject->getKey());
+    }
+
+    public function scopeForEvent(Builder $query, string $event): Builder
+    {
+        return $query->where('event', $event);
+    }
+
+    public function scopeHasBatch(Builder $query): Builder
+    {
+        return $query->whereNotNull('batch_uuid');
+    }
+
+    public function scopeForBatch(Builder $query, string $batchUuid): Builder
+    {
+        return $query->where('batch_uuid', $batchUuid);
     }
 }

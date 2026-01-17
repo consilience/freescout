@@ -2,9 +2,12 @@
 
 namespace Illuminate\Validation\Rules;
 
-class Exists
+use Illuminate\Support\Traits\Conditionable;
+use Stringable;
+
+class Exists implements Stringable
 {
-    use DatabaseRule;
+    use Conditionable, DatabaseRule;
 
     /**
      * Convert the rule to a validation string.

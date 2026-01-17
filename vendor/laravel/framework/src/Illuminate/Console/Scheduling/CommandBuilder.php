@@ -32,9 +32,9 @@ class CommandBuilder
     {
         $output = ProcessUtils::escapeArgument($event->output);
 
-        return $this->ensureCorrectUser(
-            $event, $event->command.($event->shouldAppendOutput ? ' >> ' : ' > ').$output.' 2>&1'
-        );
+        return laravel_cloud()
+            ? $this->ensureCorrectUser($event, $event->command.' 2>&1 | tee '.($event->shouldAppendOutput ? '-a ' : '').$output)
+            : $this->ensureCorrectUser($event, $event->command.($event->shouldAppendOutput ? ' >> ' : ' > ').$output.' 2>&1');
     }
 
     /**
@@ -51,8 +51,12 @@ class CommandBuilder
 
         $finished = Application::formatCommandString('schedule:finish').' "'.$event->mutexName().'"';
 
+        if (windows_os()) {
+            return 'start /b cmd /v:on /c "('.$event->command.' & '.$finished.' ^!ERRORLEVEL^!)'.$redirect.$output.' 2>&1"';
+        }
+
         return $this->ensureCorrectUser($event,
-            '('.$event->command.$redirect.$output.' 2>&1 '.(windows_os() ? '&' : ';').' '.$finished.') > '
+            '('.$event->command.$redirect.$output.' 2>&1 ; '.$finished.' "$?") > '
             .ProcessUtils::escapeArgument($event->getDefaultOutput()).' 2>&1 &'
         );
     }

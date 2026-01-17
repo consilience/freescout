@@ -253,6 +253,17 @@ class Str
     }
 
     /**
+     * Get a new stringable object from the given string.
+     *
+     * @param  string  $string
+     * @return \Illuminate\Support\Stringable
+     */
+    public static function of($string)
+    {
+        return new Stringable($string);
+    }
+
+    /**
      * Parse a Class@method style callback into class and method.
      *
      * @param  string  $callback

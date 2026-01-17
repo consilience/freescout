@@ -2,9 +2,12 @@
 
 namespace Illuminate\Queue\Console;
 
-use Illuminate\Support\Arr;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'queue:failed')]
 class ListFailedCommand extends Command
 {
     /**
@@ -24,7 +27,7 @@ class ListFailedCommand extends Command
     /**
      * The table headers for the command.
      *
-     * @var array
+     * @var string[]
      */
     protected $headers = ['ID', 'Connection', 'Queue', 'Class', 'Failed At'];
 
@@ -35,11 +38,13 @@ class ListFailedCommand extends Command
      */
     public function handle()
     {
-        if (count($jobs = $this->getFailedJobs()) == 0) {
-            return $this->info('No failed jobs!');
+        if (count($jobs = $this->getFailedJobs()) === 0) {
+            return $this->components->info('No failed jobs found.');
         }
 
+        $this->newLine();
         $this->displayFailedJobs($jobs);
+        $this->newLine();
     }
 
     /**
@@ -51,9 +56,10 @@ class ListFailedCommand extends Command
     {
         $failed = $this->laravel['queue.failer']->all();
 
-        return collect($failed)->map(function ($failed) {
-            return $this->parseFailedJob((array) $failed);
-        })->filter()->all();
+        return (new Collection($failed))
+            ->map(fn ($failed) => $this->parseFailedJob((array) $failed))
+            ->filter()
+            ->all();
     }
 
     /**
@@ -66,7 +72,7 @@ class ListFailedCommand extends Command
     {
         $row = array_values(Arr::except($failed, ['payload', 'exception']));
 
-        array_splice($row, 3, 0, $this->extractJobName($failed['payload']));
+        array_splice($row, 3, 0, $this->extractJobName($failed['payload']) ?: '');
 
         return $row;
     }
@@ -92,17 +98,13 @@ class ListFailedCommand extends Command
      * Match the job name from the payload.
      *
      * @param  array  $payload
-     * @return string
+     * @return string|null
      */
     protected function matchJobName($payload)
     {
         preg_match('/"([^"]+)"/', $payload['data']['command'], $matches);
 
-        if (isset($matches[1])) {
-            return $matches[1];
-        }
-
-        return $payload['job'] ?? null;
+        return $matches[1] ?? $payload['job'] ?? null;
     }
 
     /**
@@ -113,6 +115,11 @@ class ListFailedCommand extends Command
      */
     protected function displayFailedJobs(array $jobs)
     {
-        $this->table($this->headers, $jobs);
+        (new Collection($jobs))->each(
+            fn ($job) => $this->components->twoColumnDetail(
+                sprintf('<fg=gray>%s</> %s</>', $job[4], $job[0]),
+                sprintf('<fg=gray>%s@%s</> %s', $job[1], $job[2], $job[3])
+            ),
+        );
     }
 }

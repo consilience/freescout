@@ -32,7 +32,6 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
      *
      * @param  \Illuminate\Database\ConnectionResolverInterface  $resolver
      * @param  string  $table
-     * @return void
      */
     public function __construct(Resolver $resolver, $table)
     {
@@ -41,20 +40,20 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     }
 
     /**
-     * Get the ran migrations.
+     * Get the completed migrations.
      *
      * @return array
      */
     public function getRan()
     {
         return $this->table()
-                ->orderBy('batch', 'asc')
-                ->orderBy('migration', 'asc')
-                ->pluck('migration')->all();
+            ->orderBy('batch', 'asc')
+            ->orderBy('migration', 'asc')
+            ->pluck('migration')->all();
     }
 
     /**
-     * Get list of migrations.
+     * Get the list of migrations.
      *
      * @param  int  $steps
      * @return array
@@ -64,8 +63,25 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
         $query = $this->table()->where('batch', '>=', '1');
 
         return $query->orderBy('batch', 'desc')
-                     ->orderBy('migration', 'desc')
-                     ->take($steps)->get()->all();
+            ->orderBy('migration', 'desc')
+            ->limit($steps)
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Get the list of the migrations by batch number.
+     *
+     * @param  int  $batch
+     * @return array
+     */
+    public function getMigrationsByBatch($batch)
+    {
+        return $this->table()
+            ->where('batch', $batch)
+            ->orderBy('migration', 'desc')
+            ->get()
+            ->all();
     }
 
     /**
@@ -81,10 +97,23 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
     }
 
     /**
+     * Get the completed migrations with their batch numbers.
+     *
+     * @return array
+     */
+    public function getMigrationBatches()
+    {
+        return $this->table()
+            ->orderBy('batch', 'asc')
+            ->orderBy('migration', 'asc')
+            ->pluck('batch', 'migration')->all();
+    }
+
+    /**
      * Log that a migration was run.
      *
      * @param  string  $file
-     * @param  int     $batch
+     * @param  int  $batch
      * @return void
      */
     public function log($file, $batch)
@@ -154,6 +183,18 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface
         $schema = $this->getConnection()->getSchemaBuilder();
 
         return $schema->hasTable($this->table);
+    }
+
+    /**
+     * Delete the migration repository data store.
+     *
+     * @return void
+     */
+    public function deleteRepository()
+    {
+        $schema = $this->getConnection()->getSchemaBuilder();
+
+        $schema->drop($this->table);
     }
 
     /**

@@ -11,6 +11,16 @@ class MailboxUser extends Model
     // This is obligatory.
     public $rememberCacheDriver = 'array';
     
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     // Action after sending a message
     const AFTER_SEND_STAY = 1;
     const AFTER_SEND_NEXT = 2;

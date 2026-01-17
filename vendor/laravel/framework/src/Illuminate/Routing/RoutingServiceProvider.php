@@ -2,14 +2,17 @@
 
 namespace Illuminate\Routing;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
+use Illuminate\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
+use Illuminate\Contracts\View\Factory as ViewFactoryContract;
+use Illuminate\Routing\Contracts\CallableDispatcher as CallableDispatcherContract;
+use Illuminate\Routing\Contracts\ControllerDispatcher as ControllerDispatcherContract;
 use Illuminate\Support\ServiceProvider;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Response as PsrResponse;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Illuminate\Contracts\View\Factory as ViewFactoryContract;
-use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
-use Illuminate\Routing\Contracts\ControllerDispatcher as ControllerDispatcherContract;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
+use Symfony\Component\HttpFoundation\Response;
 
 class RoutingServiceProvider extends ServiceProvider
 {
@@ -21,17 +24,12 @@ class RoutingServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerRouter();
-
         $this->registerUrlGenerator();
-
         $this->registerRedirector();
-
         $this->registerPsrRequest();
-
         $this->registerPsrResponse();
-
         $this->registerResponseFactory();
-
+        $this->registerCallableDispatcher();
         $this->registerControllerDispatcher();
     }
 
@@ -62,14 +60,25 @@ class RoutingServiceProvider extends ServiceProvider
             // and all the registered routes will be available to the generator.
             $app->instance('routes', $routes);
 
-            $url = new UrlGenerator(
+            return new UrlGenerator(
                 $routes, $app->rebinding(
                     'request', $this->requestRebinder()
-                )
+                ), $app['config']['app.asset_url']
             );
+        });
 
+        $this->app->extend('url', function (UrlGeneratorContract $url, $app) {
+            // Next we will set a few service resolvers on the URL generator so it can
+            // get the information it needs to function. This just provides some of
+            // the convenience features to this URL generator like "signed" URLs.
             $url->setSessionResolver(function () {
-                return $this->app['session'];
+                return $this->app['session'] ?? null;
+            });
+
+            $url->setKeyResolver(function () {
+                $config = $this->app->make('config');
+
+                return [$config->get('app.key'), ...($config->get('app.previous_keys') ?? [])];
             });
 
             // If the route collection is "rebound", for example, when the routes stay
@@ -124,7 +133,20 @@ class RoutingServiceProvider extends ServiceProvider
     protected function registerPsrRequest()
     {
         $this->app->bind(ServerRequestInterface::class, function ($app) {
-            return (new DiactorosFactory)->createRequest($app->make('request'));
+            if (class_exists(PsrHttpFactory::class)) {
+                $illuminateRequest = $app->make('request');
+                $request = (new PsrHttpFactory)->createRequest($illuminateRequest);
+
+                if ($illuminateRequest->getContentTypeFormat() !== 'json' && $illuminateRequest->request->count() === 0) {
+                    return $request;
+                }
+
+                return $request->withParsedBody(
+                    array_merge($request->getParsedBody() ?? [], $illuminateRequest->getPayload()->all())
+                );
+            }
+
+            throw new BindingResolutionException('Unable to resolve PSR request. Please install the "symfony/psr-http-message-bridge" package.');
         });
     }
 
@@ -135,8 +157,12 @@ class RoutingServiceProvider extends ServiceProvider
      */
     protected function registerPsrResponse()
     {
-        $this->app->bind(ResponseInterface::class, function ($app) {
-            return new PsrResponse;
+        $this->app->bind(ResponseInterface::class, function () {
+            if (class_exists(PsrHttpFactory::class)) {
+                return (new PsrHttpFactory)->createResponse(new Response);
+            }
+
+            throw new BindingResolutionException('Unable to resolve PSR response. Please install the "symfony/psr-http-message-bridge" package.');
         });
     }
 
@@ -149,6 +175,18 @@ class RoutingServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ResponseFactoryContract::class, function ($app) {
             return new ResponseFactory($app[ViewFactoryContract::class], $app['redirect']);
+        });
+    }
+
+    /**
+     * Register the callable dispatcher.
+     *
+     * @return void
+     */
+    protected function registerCallableDispatcher()
+    {
+        $this->app->singleton(CallableDispatcherContract::class, function ($app) {
+            return new CallableDispatcher($app);
         });
     }
 

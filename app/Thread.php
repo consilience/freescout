@@ -17,6 +17,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Thread extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     /**
      * By whom action performed (source_via).
      */

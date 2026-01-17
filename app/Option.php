@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Option extends Model
 {
+
+    /**
+     * Get the queueable relationships for this model (Laravel 11 requirement).
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
     // Value returned when cache contains default value.
     const CACHE_DEFAULT_VALUE = 'CACHE_DEFAULT_VALUE';
 

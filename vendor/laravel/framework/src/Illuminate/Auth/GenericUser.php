@@ -17,7 +17,6 @@ class GenericUser implements UserContract
      * Create a new generic User object.
      *
      * @param  array  $attributes
-     * @return void
      */
     public function __construct(array $attributes)
     {
@@ -41,9 +40,17 @@ class GenericUser implements UserContract
      */
     public function getAuthIdentifier()
     {
-        $name = $this->getAuthIdentifierName();
+        return $this->attributes[$this->getAuthIdentifierName()];
+    }
 
-        return $this->attributes[$name];
+    /**
+     * Get the name of the password attribute for the user.
+     *
+     * @return string
+     */
+    public function getAuthPasswordName()
+    {
+        return 'password';
     }
 
     /**
@@ -53,7 +60,7 @@ class GenericUser implements UserContract
      */
     public function getAuthPassword()
     {
-        return $this->attributes['password'];
+        return $this->attributes[$this->getAuthPasswordName()];
     }
 
     /**

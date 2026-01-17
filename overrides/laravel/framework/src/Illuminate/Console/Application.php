@@ -246,6 +246,31 @@ class Application extends SymfonyApplication implements ApplicationContract
     }
 
     /**
+     * Set the container command loader for lazy command resolution (Laravel 11).
+     *
+     * @return $this
+     */
+    public function setContainerCommandLoader()
+    {
+        // In Laravel 11, this sets up lazy command loading through the container
+        // For now, we'll just return $this to maintain compatibility
+        // The actual command loading is handled by resolveCommands()
+        return $this;
+    }
+
+    /**
+     * Set the application to dispatch signals as events (Laravel 11).
+     *
+     * @return $this
+     */
+    public function setSignalsToDispatchEvent()
+    {
+        // In Laravel 11, this configures signal handling to dispatch events
+        // For now, we'll just return $this to maintain compatibility
+        return $this;
+    }
+
+    /**
      * Get the default input definitions for the applications.
      *
      * This is used to add the --env option to every available command.

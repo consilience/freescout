@@ -83,6 +83,13 @@ abstract class AbstractPaginator implements Htmlable
     protected static $viewFactoryResolver;
 
     /**
+     * The query string resolver callback.
+     *
+     * @var \Closure
+     */
+    protected static $queryStringResolver;
+
+    /**
      * The default pagination view.
      *
      * @var string
@@ -339,6 +346,16 @@ abstract class AbstractPaginator implements Htmlable
     }
 
     /**
+     * Get the base path to assign to all URLs.
+     *
+     * @return string
+     */
+    public function path()
+    {
+        return $this->path;
+    }
+
+    /**
      * Set the base path to assign to all URLs.
      *
      * @param  string  $path
@@ -423,6 +440,17 @@ abstract class AbstractPaginator implements Htmlable
     public static function viewFactoryResolver(Closure $resolver)
     {
         static::$viewFactoryResolver = $resolver;
+    }
+
+    /**
+     * Set the query string resolver callback.
+     *
+     * @param  \Closure  $resolver
+     * @return void
+     */
+    public static function queryStringResolver(Closure $resolver)
+    {
+        static::$queryStringResolver = $resolver;
     }
 
     /**

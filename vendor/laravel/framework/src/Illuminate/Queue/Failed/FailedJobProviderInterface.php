@@ -10,10 +10,18 @@ interface FailedJobProviderInterface
      * @param  string  $connection
      * @param  string  $queue
      * @param  string  $payload
-     * @param  \Exception  $exception
-     * @return int|null
+     * @param  \Throwable  $exception
+     * @return string|int|null
      */
     public function log($connection, $queue, $payload, $exception);
+
+    /**
+     * Get the IDs of all of the failed jobs.
+     *
+     * @param  string|null  $queue
+     * @return array
+     */
+    public function ids($queue = null);
 
     /**
      * Get a list of all of the failed jobs.
@@ -41,7 +49,8 @@ interface FailedJobProviderInterface
     /**
      * Flush all of the failed jobs from storage.
      *
+     * @param  int|null  $hours
      * @return void
      */
-    public function flush();
+    public function flush($hours = null);
 }

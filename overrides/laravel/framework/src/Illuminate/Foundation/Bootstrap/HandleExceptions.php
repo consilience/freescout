@@ -4,11 +4,10 @@ namespace Illuminate\Foundation\Bootstrap;
 
 use Exception;
 use ErrorException;
+use Throwable;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\Application;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 class HandleExceptions
 {
@@ -73,9 +72,8 @@ class HandleExceptions
      */
     public function handleException($e)
     {
-        if (! $e instanceof Exception) {
-            $e = new FatalThrowableError($e);
-        }
+        // In modern PHP/Laravel, all errors are Throwable
+        // No need to convert to FatalThrowableError
 
         try {
             $this->getExceptionHandler()->report($e);
@@ -101,7 +99,7 @@ class HandleExceptions
      * @param  \Exception  $e
      * @return void
      */
-    protected function renderForConsole(Exception $e)
+    protected function renderForConsole(Throwable $e)
     {
         $this->getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
     }
@@ -134,12 +132,12 @@ class HandleExceptions
      *
      * @param  array  $error
      * @param  int|null  $traceOffset
-     * @return \Symfony\Component\Debug\Exception\FatalErrorException
+     * @return \ErrorException
      */
     protected function fatalExceptionFromError(array $error, $traceOffset = null)
     {
-        return new FatalErrorException(
-            $error['message'], $error['type'], 0, $error['file'], $error['line'], $traceOffset
+        return new \ErrorException(
+            $error['message'], 0, $error['type'], $error['file'], $error['line']
         );
     }
 

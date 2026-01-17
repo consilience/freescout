@@ -3,9 +3,11 @@
 namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand(name: 'migrate:install')]
 class InstallCommand extends Command
 {
     /**
@@ -33,7 +35,6 @@ class InstallCommand extends Command
      * Create a new migration install command instance.
      *
      * @param  \Illuminate\Database\Migrations\MigrationRepositoryInterface  $repository
-     * @return void
      */
     public function __construct(MigrationRepositoryInterface $repository)
     {
@@ -51,9 +52,11 @@ class InstallCommand extends Command
     {
         $this->repository->setSource($this->input->getOption('database'));
 
-        $this->repository->createRepository();
+        if (! $this->repository->repositoryExists()) {
+            $this->repository->createRepository();
+        }
 
-        $this->info('Migration table created successfully.');
+        $this->components->info('Migration table created successfully.');
     }
 
     /**
@@ -64,7 +67,7 @@ class InstallCommand extends Command
     protected function getOptions()
     {
         return [
-            ['database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'],
+            ['database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'],
         ];
     }
 }
