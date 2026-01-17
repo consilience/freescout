@@ -75,6 +75,12 @@ return [
             'engine'      => null,
         ],
 
+        'testing_sqlite' => [
+            'driver'   => 'sqlite',
+            'database' => database_path('testing.sqlite'),
+            'prefix'   => env('DB_TABLE_PREFIX', ''),
+        ],
+
         'testing_pgsql' => [
             'driver'   => 'pgsql',
             'host'     => 'localhost',

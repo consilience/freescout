@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'freescout-helpdesk/freescout',
-        'pretty_version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
-        'version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
-        'reference' => 'c4f378565823625a0b2ef042d039647a6135b1bb',
+        'pretty_version' => 'dev-claude/run-tests-fix-issues-cqcte',
+        'version' => 'dev-claude/run-tests-fix-issues-cqcte',
+        'reference' => '82f5df7847df22d56725b4ca1a79942ad0684e1a',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -203,9 +203,9 @@
             'dev_requirement' => true,
         ),
         'freescout-helpdesk/freescout' => array(
-            'pretty_version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
-            'version' => 'dev-claude/laravel-upgrade-plan-01C6YSfLUtgS6JmhvQ8eoBVU',
-            'reference' => 'c4f378565823625a0b2ef042d039647a6135b1bb',
+            'pretty_version' => 'dev-claude/run-tests-fix-issues-cqcte',
+            'version' => 'dev-claude/run-tests-fix-issues-cqcte',
+            'reference' => '82f5df7847df22d56725b4ca1a79942ad0684e1a',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -650,9 +650,9 @@
             'dev_requirement' => false,
         ),
         'mockery/mockery' => array(
-            'pretty_version' => '1.1.0',
-            'version' => '1.1.0.0',
-            'reference' => '99e29d3596b16dabe4982548527d5ddf90232e99',
+            'pretty_version' => '1.6.12',
+            'version' => '1.6.12.0',
+            'reference' => '1f4efdd7d3beafe9807b08156dfcb176d18f1699',
             'type' => 'library',
             'install_path' => __DIR__ . '/../mockery/mockery',
             'aliases' => array(),

@@ -49,6 +49,20 @@ abstract class TestCase extends BaseTestCase
     protected $setUpHasRun = false;
 
     /**
+     * The original error handler before test setup.
+     *
+     * @var callable|null
+     */
+    protected $originalErrorHandler;
+
+    /**
+     * The original exception handler before test setup.
+     *
+     * @var callable|null
+     */
+    protected $originalExceptionHandler;
+
+    /**
      * Creates the application.
      *
      * Needs to be implemented by subclasses.
@@ -64,6 +78,12 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUp() : void
     {
+        // Save current handlers so we can restore them later (PHPUnit 11 risky test fix)
+        $this->originalErrorHandler = set_error_handler(function () {});
+        restore_error_handler();
+        $this->originalExceptionHandler = set_exception_handler(function () {});
+        restore_exception_handler();
+
         if (! $this->app) {
             $this->refreshApplication();
         }
@@ -170,6 +190,37 @@ abstract class TestCase extends BaseTestCase
         $this->beforeApplicationDestroyedCallbacks = [];
 
         Artisan::forgetBootstrappers();
+
+        // Restore original handlers (PHPUnit 11 risky test fix)
+        $this->restoreErrorHandlers();
+    }
+
+    /**
+     * Restore error and exception handlers to their original state.
+     *
+     * @return void
+     */
+    protected function restoreErrorHandlers(): void
+    {
+        // Remove all error handlers set during the test until we reach original
+        while (true) {
+            $current = set_error_handler(function () {});
+            restore_error_handler();
+            if ($current === $this->originalErrorHandler) {
+                break;
+            }
+            restore_error_handler();
+        }
+
+        // Remove all exception handlers set during the test until we reach original
+        while (true) {
+            $current = set_exception_handler(function () {});
+            restore_exception_handler();
+            if ($current === $this->originalExceptionHandler) {
+                break;
+            }
+            restore_exception_handler();
+        }
     }
 
     /**

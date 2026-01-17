@@ -37,6 +37,7 @@ class ConfigTest extends TestCase
       # This is to ensure tests don't influence each other
       putenv("APP_KEY=" . $this->original_app_key);
       putenv("APP_KEY_FILE=" . $this->original_app_key_file);
+      parent::tearDown();
     }
 
     protected function assertKey($value) {

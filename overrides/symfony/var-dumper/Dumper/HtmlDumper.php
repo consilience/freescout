@@ -27,10 +27,10 @@ class HtmlDumper extends CliDumper
     protected $dumpPrefix = '<pre class=sf-dump id=%s data-indent-pad="%s">';
     protected $dumpSuffix = '</pre><script>Sfdump(%s)</script>';
     protected $dumpId = 'sf-dump';
-    protected $colors = true;
+    protected bool $colors = true;
     protected $headerIsDumped = false;
     protected $lastDepth = -1;
-    protected $styles = [
+    protected array $styles = [
         'default' => 'background-color:#18171B; color:#FF8400; line-height:1.2em; font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:99999; word-break: break-all',
         'num' => 'font-weight:bold; color:#1299DA',
         'const' => 'font-weight:bold',
@@ -66,7 +66,7 @@ class HtmlDumper extends CliDumper
     /**
      * {@inheritdoc}
      */
-    public function setStyles(array $styles)
+    public function setStyles(array $styles): void
     {
         $this->headerIsDumped = false;
         $this->styles = $styles + $this->styles;

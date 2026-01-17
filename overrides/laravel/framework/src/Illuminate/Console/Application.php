@@ -81,14 +81,14 @@ class Application extends SymfonyApplication implements ApplicationContract
 
         $this->events->fire(
             new Events\CommandStarting(
-                $commandName, $input, $output = $output ?: new ConsoleOutput
+                $commandName ?? '', $input, $output = $output ?: new ConsoleOutput
             )
         );
 
         $exitCode = parent::run($input, $output);
 
         $this->events->fire(
-            new Events\CommandFinished($commandName, $input, $output, $exitCode)
+            new Events\CommandFinished($commandName ?? '', $input, $output, $exitCode)
         );
 
         return $exitCode;
