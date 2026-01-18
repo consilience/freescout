@@ -71,4 +71,19 @@ abstract class Compiler
         return $this->files->lastModified($path) >=
                $this->files->lastModified($compiled);
     }
+
+    /**
+     * Create the compiled file directory if necessary.
+     *
+     * @param  string  $path
+     * @return void
+     */
+    protected function ensureCompiledDirectoryExists($path)
+    {
+        $directory = dirname($path);
+
+        if (! $this->files->isDirectory($directory)) {
+            $this->files->makeDirectory($directory, 0777, true, true);
+        }
+    }
 }

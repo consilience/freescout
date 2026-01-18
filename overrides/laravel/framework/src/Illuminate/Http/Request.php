@@ -20,6 +20,18 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
         Macroable;
 
     /**
+     * Trusted proxy header constants (Symfony 7 compatible).
+     */
+    public const HEADER_FORWARDED = 0b000001;
+    public const HEADER_X_FORWARDED_FOR = 0b000010;
+    public const HEADER_X_FORWARDED_HOST = 0b000100;
+    public const HEADER_X_FORWARDED_PROTO = 0b001000;
+    public const HEADER_X_FORWARDED_PORT = 0b010000;
+    public const HEADER_X_FORWARDED_PREFIX = 0b100000;
+    public const HEADER_X_FORWARDED_AWS_ELB = 0b0011010;
+    public const HEADER_X_FORWARDED_TRAEFIK = 0b0111110;
+
+    /**
      * The decoded JSON content for the request.
      *
      * @var \Symfony\Component\HttpFoundation\ParameterBag|null
@@ -281,6 +293,16 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
     public function userAgent()
     {
         return $this->headers->get('User-Agent');
+    }
+
+    /**
+     * Get the host name.
+     *
+     * @return string
+     */
+    public function host()
+    {
+        return $this->getHost();
     }
 
     /**

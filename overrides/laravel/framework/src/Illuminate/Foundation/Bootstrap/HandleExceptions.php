@@ -107,10 +107,10 @@ class HandleExceptions
     /**
      * Render an exception as an HTTP response and send it.
      *
-     * @param  \Exception  $e
+     * @param  \Throwable  $e
      * @return void
      */
-    protected function renderHttpResponse(Exception $e)
+    protected function renderHttpResponse(Throwable $e)
     {
         $this->getExceptionHandler()->render($this->app['request'], $e)->send();
     }

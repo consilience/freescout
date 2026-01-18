@@ -76,6 +76,45 @@ class Str
     }
 
     /**
+     * Get the portion of a string before the last occurrence of a given value.
+     *
+     * @param  string  $subject
+     * @param  string  $search
+     * @return string
+     */
+    public static function beforeLast($subject, $search)
+    {
+        if ($search === '') {
+            return $subject;
+        }
+
+        $pos = mb_strrpos($subject, $search);
+
+        if ($pos === false) {
+            return $subject;
+        }
+
+        return static::substr($subject, 0, $pos);
+    }
+
+    /**
+     * Get the portion of a string between two given values.
+     *
+     * @param  string  $subject
+     * @param  string  $from
+     * @param  string  $to
+     * @return string
+     */
+    public static function between($subject, $from, $to)
+    {
+        if ($from === '' || $to === '') {
+            return $subject;
+        }
+
+        return static::beforeLast(static::after($subject, $from), $to);
+    }
+
+    /**
      * Convert a value to camel case.
      *
      * @param  string  $value
@@ -690,5 +729,47 @@ class Str
         }
 
         return $languageSpecific[$language] ?? null;
+    }
+
+    /**
+     * Trim the string of the given characters.
+     *
+     * @param  string  $value
+     * @param  string|null  $characters
+     * @return string
+     */
+    public static function trim($value, $characters = null)
+    {
+        return $characters === null
+            ? trim($value)
+            : trim($value, $characters);
+    }
+
+    /**
+     * Left trim the string of the given characters.
+     *
+     * @param  string  $value
+     * @param  string|null  $characters
+     * @return string
+     */
+    public static function ltrim($value, $characters = null)
+    {
+        return $characters === null
+            ? ltrim($value)
+            : ltrim($value, $characters);
+    }
+
+    /**
+     * Right trim the string of the given characters.
+     *
+     * @param  string  $value
+     * @param  string|null  $characters
+     * @return string
+     */
+    public static function rtrim($value, $characters = null)
+    {
+        return $characters === null
+            ? rtrim($value)
+            : rtrim($value, $characters);
     }
 }

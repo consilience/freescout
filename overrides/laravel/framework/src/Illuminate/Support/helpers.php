@@ -8,6 +8,18 @@ use Illuminate\Support\Debug\Dumper;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HigherOrderTapProxy;
 
+if (! function_exists('laravel_cloud')) {
+    /**
+     * Determine if the application is running on Laravel Cloud.
+     *
+     * @return bool
+     */
+    function laravel_cloud()
+    {
+        return isset($_ENV['LARAVEL_CLOUD']) || isset($_SERVER['LARAVEL_CLOUD']);
+    }
+}
+
 if (! function_exists('append_config')) {
     /**
      * Assign high numeric IDs to a config item to force appending.

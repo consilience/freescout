@@ -86,6 +86,7 @@
             "HTMLPurifier_": "overrides/ezyang/htmlpurifier/library"
         },
         "files": [
+            "overrides/carbon-compat.php",
             "app/Misc/Functions.php"
         ],
         "fs-comment": "Above new lines are listed files containing custom updates. Below - only PHP compatibility updates.",
@@ -171,8 +172,6 @@
             "Illuminate\\Validation\\": "overrides/laravel/framework/src/Illuminate/Validation/",
             "Illuminate\\Contracts\\Container\\": "overrides/laravel/framework/src/Illuminate/Contracts/Container/",
             "Symfony\\Component\\Routing\\": "overrides/symfony/routing/",
-            "Symfony\\Component\\VarDumper\\Cloner\\": "overrides/symfony/var-dumper/Cloner/",
-            "Symfony\\Component\\VarDumper\\Dumper\\": "overrides/symfony/var-dumper/Dumper/",
             "Devfactory\\Minify\\Providers\\": "overrides/devfactory/minify/src/Providers/",
             "Barryvdh\\Debugbar\\": "overrides/barryvdh/laravel-debugbar/src/",
             "Barryvdh\\Debugbar\\DataFormatter\\": "overrides/barryvdh/laravel-debugbar/src/DataFormatter/",
@@ -336,10 +335,6 @@
             "vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesLayouts.php",
             "vendor/symfony/routing/Route.php",
             "vendor/symfony/routing/CompiledRoute.php",
-            "vendor/symfony/var-dumper/Cloner/Data.php",
-            "vendor/symfony/var-dumper/Cloner/Stub.php",
-            "vendor/symfony/var-dumper/Cloner/AbstractCloner.php",
-            "vendor/symfony/var-dumper/Dumper/HtmlDumper.php",
             "vendor/devfactory/minify/src/Providers/BaseProvider.php",
             "vendor/barryvdh/laravel-debugbar/src/DataFormatter/QueryFormatter.php",
             "vendor/barryvdh/laravel-debugbar/src/DataCollector/QueryCollector.php",

@@ -5,6 +5,7 @@ namespace Illuminate\Routing;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Illuminate\Support\Traits\Macroable;
@@ -91,6 +92,13 @@ class UrlGenerator implements UrlGeneratorContract
      * @var \Illuminate\Routing\RouteUrlGenerator|null
      */
     protected $routeGenerator;
+
+    /**
+     * The encryption key resolver callable.
+     *
+     * @var callable
+     */
+    protected $keyResolver;
 
     /**
      * Create a new URL Generator instance.
@@ -651,6 +659,150 @@ class UrlGenerator implements UrlGeneratorContract
     public function setRootControllerNamespace($rootNamespace)
     {
         $this->rootNamespace = $rootNamespace;
+
+        return $this;
+    }
+
+    /**
+     * Get the root controller namespace.
+     *
+     * @return string
+     */
+    public function getRootControllerNamespace()
+    {
+        return $this->rootNamespace;
+    }
+
+    /**
+     * Create a signed route URL for a named route.
+     *
+     * @param  string  $name
+     * @param  mixed  $parameters
+     * @param  \DateTimeInterface|\DateInterval|int|null  $expiration
+     * @param  bool  $absolute
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function signedRoute($name, $parameters = [], $expiration = null, $absolute = true)
+    {
+        $this->ensureSignedRouteParametersAreNotReserved(
+            $parameters = Arr::wrap($parameters)
+        );
+
+        if ($expiration) {
+            $parameters = $parameters + ['expires' => $this->availableAt($expiration)];
+        }
+
+        ksort($parameters);
+
+        $key = call_user_func($this->keyResolver);
+
+        return $this->route($name, $parameters + [
+            'signature' => hash_hmac(
+                'sha256',
+                $this->route($name, $parameters, $absolute),
+                is_array($key) ? $key[0] : $key
+            ),
+        ], $absolute);
+    }
+
+    /**
+     * Create a temporary signed route URL for a named route.
+     *
+     * @param  string  $name
+     * @param  \DateTimeInterface|\DateInterval|int  $expiration
+     * @param  array  $parameters
+     * @param  bool  $absolute
+     * @return string
+     */
+    public function temporarySignedRoute($name, $expiration, $parameters = [], $absolute = true)
+    {
+        return $this->signedRoute($name, $parameters, $expiration, $absolute);
+    }
+
+    /**
+     * Generate an absolute URL with the given query parameters.
+     *
+     * @param  string  $path
+     * @param  array  $query
+     * @param  mixed  $extra
+     * @param  bool|null  $secure
+     * @return string
+     */
+    public function query($path, $query = [], $extra = [], $secure = null)
+    {
+        [$path, $existingQueryString] = $this->extractQueryString($path);
+
+        parse_str(Str::after($existingQueryString, '?'), $existingQueryArray);
+
+        return rtrim($this->to($path.'?'.Arr::query(
+            array_merge($existingQueryArray, $query)
+        ), $extra, $secure), '?');
+    }
+
+    /**
+     * Ensure the given signed route parameters are not reserved.
+     *
+     * @param  mixed  $parameters
+     * @return void
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function ensureSignedRouteParametersAreNotReserved($parameters)
+    {
+        if (array_key_exists('signature', $parameters)) {
+            throw new InvalidArgumentException(
+                '"Signature" is a reserved parameter when generating signed routes.'
+            );
+        }
+
+        if (array_key_exists('expires', $parameters)) {
+            throw new InvalidArgumentException(
+                '"Expires" is a reserved parameter when generating signed routes.'
+            );
+        }
+    }
+
+    /**
+     * Get the "available at" UNIX timestamp.
+     *
+     * @param  \DateTimeInterface|\DateInterval|int  $delay
+     * @return int
+     */
+    protected function availableAt($delay = 0)
+    {
+        $delay = $this->parseDateInterval($delay);
+
+        return $delay instanceof \DateTimeInterface
+            ? $delay->getTimestamp()
+            : Carbon::now()->addRealSeconds($delay)->getTimestamp();
+    }
+
+    /**
+     * If the given value is an interval, convert it to a DateTime instance.
+     *
+     * @param  \DateTimeInterface|\DateInterval|int  $delay
+     * @return \DateTimeInterface|int
+     */
+    protected function parseDateInterval($delay)
+    {
+        if ($delay instanceof \DateInterval) {
+            $delay = Carbon::now()->add($delay);
+        }
+
+        return $delay;
+    }
+
+    /**
+     * Set the encryption key resolver.
+     *
+     * @param  callable  $keyResolver
+     * @return $this
+     */
+    public function setKeyResolver(callable $keyResolver)
+    {
+        $this->keyResolver = $keyResolver;
 
         return $this;
     }

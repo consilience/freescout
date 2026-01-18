@@ -74,14 +74,22 @@ class Filesystem
      * Get the returned value of a file.
      *
      * @param  string  $path
+     * @param  array  $data
      * @return mixed
      *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function getRequire($path)
+    public function getRequire($path, array $data = [])
     {
         if ($this->isFile($path)) {
-            return require $path;
+            $__path = $path;
+            $__data = $data;
+
+            return (static function () use ($__path, $__data) {
+                extract($__data, EXTR_SKIP);
+
+                return require $__path;
+            })();
         }
 
         throw new FileNotFoundException("File does not exist at path {$path}");
